@@ -64,15 +64,6 @@ public class IDEActivity extends AppCompatActivity {
         editor.setPadding(20, 20, 20, 20);
         editor.setHorizontallyScrolling(true);
         editor.setBackgroundColor(0xFFFFFFFF);
-        editor.addTextChangedListener(new android.text.TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            public void afterTextChanged(android.text.Editable s) {
-                if (currentFile != null) {
-                    applySyntaxHighlighting(currentFile.getName(), s.toString());
-                }
-            }
-        });
         editorScroll.addView(editor);
         mainLayout.addView(editorScroll);
         
@@ -340,23 +331,7 @@ public class IDEActivity extends AppCompatActivity {
             
             currentFile = file;
             String content = new String(data);
-            
-            // Remove text watcher temporarily
-            editor.addTextChangedListener(null);
             editor.setText(content);
-            
-            // Re-add text watcher
-            editor.addTextChangedListener(new android.text.TextWatcher() {
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                public void onTextChanged(CharSequence s, int start, int before, int count) {}
-                public void afterTextChanged(android.text.Editable s) {
-                    if (currentFile != null) {
-                        applySyntaxHighlighting(currentFile.getName(), s.toString());
-                    }
-                }
-            });
-            
-            applySyntaxHighlighting(file.getName(), content);
             
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setSubtitle(file.getName());

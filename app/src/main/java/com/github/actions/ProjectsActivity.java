@@ -22,6 +22,11 @@ public class ProjectsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        // Hide action bar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+        
         prefs = getSharedPreferences("GitCodeProjects", MODE_PRIVATE);
         
         LinearLayout mainLayout = new LinearLayout(this);
@@ -148,26 +153,29 @@ public class ProjectsActivity extends AppCompatActivity {
             File dir = new File(path);
             if (!dir.exists()) continue;
             
-            validProjects.append(project).append(";");
+            // Get actual folder name from path
+            String actualName = dir.getName();
+            
+            validProjects.append(actualName).append("|").append(path).append(";");
             
             LinearLayout projectItem = new LinearLayout(this);
             projectItem.setOrientation(LinearLayout.HORIZONTAL);
             projectItem.setPadding(0, 5, 0, 5);
             
             Button btn = new Button(this);
-            btn.setText("📁 " + name);
+            btn.setText("📁 " + actualName);
             btn.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-            btn.setOnClickListener(v -> openProject(name, path));
+            btn.setOnClickListener(v -> openProject(actualName, path));
             projectItem.addView(btn);
             
             Button btnEdit = new Button(this);
             btnEdit.setText("✏");
-            btnEdit.setOnClickListener(v -> editProject(name, path));
+            btnEdit.setOnClickListener(v -> editProject(actualName, path));
             projectItem.addView(btnEdit);
             
             Button btnDelete = new Button(this);
             btnDelete.setText("🗑");
-            btnDelete.setOnClickListener(v -> deleteProject(name, path));
+            btnDelete.setOnClickListener(v -> deleteProject(actualName, path));
             projectItem.addView(btnDelete);
             
             projectsList.addView(projectItem);
@@ -199,15 +207,33 @@ public class ProjectsActivity extends AppCompatActivity {
     private void deleteProject(String name, String path) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete Project");
-        builder.setMessage("Remove '" + name + "' from list? (Files will not be deleted)");
+        builder.setMessage("Delete '" + name + "' and all its files?");
         builder.setPositiveButton("Delete", (d, w) -> {
-            String projects = prefs.getString("projects", "");
-            projects = projects.replace(name + "|" + path + ";", "");
-            prefs.edit().putString("projects", projects).apply();
-            loadProjects();
+            File dir = new File(path);
+            if (deleteRecursive(dir)) {
+                String projects = prefs.getString("projects", "");
+                projects = projects.replace(name + "|" + path + ";", "");
+                prefs.edit().putString("projects", projects).apply();
+                loadProjects();
+                Toast.makeText(this, "Project deleted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Failed to delete project", Toast.LENGTH_SHORT).show();
+            }
         });
         builder.setNegativeButton("Cancel", null);
         builder.show();
+    }
+
+    private boolean deleteRecursive(File file) {
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    deleteRecursive(f);
+                }
+            }
+        }
+        return file.delete();
     }
 
     private void openProject(String name, String path) {
