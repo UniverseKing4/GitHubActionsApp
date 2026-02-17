@@ -93,14 +93,24 @@ public class ProjectsActivity extends AppCompatActivity {
                 path = Environment.getExternalStorageDirectory() + "/GitCode/";
             }
             
-            String fullPath = path + name;
-            File dir = new File(fullPath);
-            if (!dir.exists()) {
-                dir.mkdirs();
+            if (!path.endsWith("/")) {
+                path += "/";
             }
             
-            saveProject(name, fullPath);
-            openProject(name, fullPath);
+            String fullPath = path + name;
+            File dir = new File(fullPath);
+            
+            if (dir.exists()) {
+                Toast.makeText(this, "Project already exists", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            if (dir.mkdirs()) {
+                saveProject(name, fullPath);
+                openProject(name, fullPath);
+            } else {
+                Toast.makeText(this, "Failed to create project", Toast.LENGTH_SHORT).show();
+            }
         });
         builder.setNegativeButton("Cancel", null);
         builder.show();
@@ -201,6 +211,12 @@ public class ProjectsActivity extends AppCompatActivity {
     }
 
     private void openProject(String name, String path) {
+        File dir = new File(path);
+        if (!dir.exists()) {
+            Toast.makeText(this, "Project folder not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
         Intent intent = new Intent(this, IDEActivity.class);
         intent.putExtra("projectName", name);
         intent.putExtra("projectPath", path);

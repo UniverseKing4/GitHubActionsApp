@@ -38,6 +38,14 @@ public class IDEActivity extends AppCompatActivity {
         projectPath = getIntent().getStringExtra("projectPath");
         prefs = getSharedPreferences("GitHubCreds", MODE_PRIVATE);
         
+        // Verify project path exists
+        File projectDir = new File(projectPath);
+        if (!projectDir.exists()) {
+            Toast.makeText(this, "Project folder not found", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+        
         drawerLayout = new DrawerLayout(this);
         
         // Main editor area
@@ -332,7 +340,21 @@ public class IDEActivity extends AppCompatActivity {
             
             currentFile = file;
             String content = new String(data);
+            
+            // Remove text watcher temporarily
+            editor.addTextChangedListener(null);
             editor.setText(content);
+            
+            // Re-add text watcher
+            editor.addTextChangedListener(new android.text.TextWatcher() {
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                public void afterTextChanged(android.text.Editable s) {
+                    if (currentFile != null) {
+                        applySyntaxHighlighting(currentFile.getName(), s.toString());
+                    }
+                }
+            });
             
             applySyntaxHighlighting(file.getName(), content);
             
@@ -346,6 +368,8 @@ public class IDEActivity extends AppCompatActivity {
     }
 
     private void applySyntaxHighlighting(String fileName, String content) {
+        if (content == null || content.isEmpty()) return;
+        
         String ext = "";
         int i = fileName.lastIndexOf('.');
         if (i > 0) {
@@ -359,33 +383,38 @@ public class IDEActivity extends AppCompatActivity {
         int stringColor = 0xFF008000;
         int commentColor = 0xFF808080;
         
-        // Highlight keywords
-        for (String keyword : keywords) {
-            int start = 0;
-            while ((start = content.indexOf(keyword, start)) != -1) {
-                if ((start == 0 || !Character.isLetterOrDigit(content.charAt(start - 1))) &&
-                    (start + keyword.length() >= content.length() || !Character.isLetterOrDigit(content.charAt(start + keyword.length())))) {
-                    spannable.setSpan(new android.text.style.ForegroundColorSpan(keywordColor),
-                        start, start + keyword.length(),
-                        android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        try {
+            // Highlight keywords
+            for (String keyword : keywords) {
+                int start = 0;
+                while ((start = content.indexOf(keyword, start)) != -1) {
+                    if ((start == 0 || !Character.isLetterOrDigit(content.charAt(start - 1))) &&
+                        (start + keyword.length() >= content.length() || !Character.isLetterOrDigit(content.charAt(start + keyword.length())))) {
+                        spannable.setSpan(new android.text.style.ForegroundColorSpan(keywordColor),
+                            start, start + keyword.length(),
+                            android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+                    start += keyword.length();
                 }
-                start += keyword.length();
             }
-        }
-        
-        // Highlight strings
-        highlightPattern(spannable, content, "\"[^\"]*\"", stringColor);
-        highlightPattern(spannable, content, "'[^']*'", stringColor);
-        
-        // Highlight comments
-        highlightPattern(spannable, content, "//.*", commentColor);
-        highlightPattern(spannable, content, "/\\*.*?\\*/", commentColor);
-        highlightPattern(spannable, content, "#.*", commentColor);
-        
-        int selection = editor.getSelectionStart();
-        editor.setText(spannable);
-        if (selection >= 0 && selection <= editor.getText().length()) {
-            editor.setSelection(selection);
+            
+            // Highlight strings
+            highlightPattern(spannable, content, "\"[^\"]*\"", stringColor);
+            highlightPattern(spannable, content, "'[^']*'", stringColor);
+            
+            // Highlight comments
+            highlightPattern(spannable, content, "//.*", commentColor);
+            highlightPattern(spannable, content, "/\\*.*?\\*/", commentColor);
+            highlightPattern(spannable, content, "#.*", commentColor);
+            
+            int selection = editor.getSelectionStart();
+            editor.setText(spannable);
+            if (selection >= 0 && selection <= editor.getText().length()) {
+                editor.setSelection(selection);
+            }
+        } catch (Exception e) {
+            // Fallback to plain text if highlighting fails
+            editor.setText(content);
         }
     }
 
