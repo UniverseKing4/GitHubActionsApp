@@ -100,8 +100,21 @@ public class MainActivity extends AppCompatActivity {
                     sb.append(line).append("\n");
                 }
                 selectedFileContent = sb.toString();
-                etContent.setText(selectedFileContent);
-                String fileName = uri.getLastPathSegment();
+                
+                String fileName = null;
+                android.database.Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+                if (cursor != null && cursor.moveToFirst()) {
+                    int nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME);
+                    if (nameIndex >= 0) {
+                        fileName = cursor.getString(nameIndex);
+                    }
+                    cursor.close();
+                }
+                
+                if (fileName == null) {
+                    fileName = uri.getLastPathSegment();
+                }
+                
                 tvSelectedFile.setText("Selected: " + fileName);
                 if (etFilePath.getText().toString().isEmpty()) {
                     etFilePath.setText(fileName);
@@ -126,18 +139,29 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        if (selectedFileContent != null && !selectedFileContent.isEmpty()) {
+            content = selectedFileContent;
+        }
+
+        if (content.isEmpty()) {
+            tvStatus.setText("No content to commit");
+            return;
+        }
+
         saveCreds();
         tvStatus.setText("Processing...");
         
+        String finalContent = content;
         executor.execute(() -> {
             GitHubAPI api = new GitHubAPI(username, token, repo);
-            String result = api.commitAndPush(filePath, content, message);
+            String result = api.commitAndPush(filePath, finalContent, message);
             runOnUiThread(() -> {
                 tvStatus.setText(result);
                 if (result.contains("Success")) {
                     etContent.setText("");
                     etMessage.setText("");
                     tvSelectedFile.setText("");
+                    selectedFileContent = null;
                 }
             });
         });
