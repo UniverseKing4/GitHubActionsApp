@@ -52,6 +52,11 @@ public class IDEActivity extends AppCompatActivity {
         SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
         boolean isDark = themePrefs.getBoolean("darkMode", false);
         
+        // Dark navigation bar
+        if (isDark && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setNavigationBarColor(0xFF000000);
+        }
+        
         // Verify project path exists
         File projectDir = new File(projectPath);
         if (!projectDir.exists()) {
@@ -1000,12 +1005,8 @@ public class IDEActivity extends AppCompatActivity {
             if (name.isEmpty()) return;
             
             File folder = new File(parent, name);
-            if (folder.exists()) {
-                if (folder.isFile()) {
-                    Toast.makeText(this, "A file with this name exists", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Folder already exists", Toast.LENGTH_SHORT).show();
-                }
+            if (folder.exists() && folder.isDirectory()) {
+                Toast.makeText(this, "Folder already exists", Toast.LENGTH_SHORT).show();
                 return;
             }
             
@@ -1129,12 +1130,8 @@ public class IDEActivity extends AppCompatActivity {
             if (name.isEmpty()) return;
             
             File folder = new File(projectPath, name);
-            if (folder.exists()) {
-                if (folder.isFile()) {
-                    Toast.makeText(this, "A file with this name exists", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Folder already exists", Toast.LENGTH_SHORT).show();
-                }
+            if (folder.exists() && folder.isDirectory()) {
+                Toast.makeText(this, "Folder already exists", Toast.LENGTH_SHORT).show();
                 return;
             }
             
@@ -1358,12 +1355,8 @@ public class IDEActivity extends AppCompatActivity {
             if (name.isEmpty()) return;
             
             File file = new File(projectPath, name);
-            if (file.exists()) {
-                if (file.isDirectory()) {
-                    Toast.makeText(this, "A folder with this name exists", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "File already exists", Toast.LENGTH_SHORT).show();
-                }
+            if (file.exists() && file.isFile()) {
+                Toast.makeText(this, "File already exists", Toast.LENGTH_SHORT).show();
                 return;
             }
             
