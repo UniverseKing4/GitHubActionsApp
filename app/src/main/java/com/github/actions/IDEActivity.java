@@ -106,6 +106,14 @@ public class IDEActivity extends AppCompatActivity {
         btnSelect.setOnClickListener(v -> toggleSelectionMode());
         btnContainer.addView(btnSelect);
         
+        android.widget.Button btnActions = new android.widget.Button(this);
+        btnActions.setText("Actions");
+        btnActions.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        btnActions.setVisibility(View.GONE);
+        btnActions.setTag("actionsBtn");
+        btnActions.setOnClickListener(v -> showSelectionMenu());
+        btnContainer.addView(btnActions);
+        
         drawer.addView(btnContainer);
         
         ScrollView fileScroll = new ScrollView(this);
@@ -302,26 +310,27 @@ public class IDEActivity extends AppCompatActivity {
         selectionMode = true;
         selectedFiles.clear();
         selectedFiles.add(file);
+        updateActionsButton();
         loadFiles();
-        showSelectionMenu();
     }
 
     private void toggleSelectionMode() {
         selectionMode = !selectionMode;
         selectedFiles.clear();
-        
-        if (selectionMode) {
-            loadFiles();
-            showSelectionMenu();
-        } else {
-            loadFiles();
+        updateActionsButton();
+        loadFiles();
+    }
+
+    private void updateActionsButton() {
+        View drawer = findViewById(android.R.id.content).getRootView().findViewWithTag("actionsBtn");
+        if (drawer != null) {
+            drawer.setVisibility(selectionMode ? View.VISIBLE : View.GONE);
         }
     }
 
     private void showSelectionMenu() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Selected: " + selectedFiles.size());
-        builder.setCancelable(false);
         
         String[] options = new String[]{"Move", "Delete", "Done"};
         
@@ -344,6 +353,7 @@ public class IDEActivity extends AppCompatActivity {
     private void exitSelectionMode() {
         selectionMode = false;
         selectedFiles.clear();
+        updateActionsButton();
         loadFiles();
     }
 
@@ -851,8 +861,7 @@ public class IDEActivity extends AppCompatActivity {
             
             int finalSuccess = success;
             runOnUiThread(() -> {
-                Toast.makeText(this, "Pushed " + finalSuccess + " files successfully", Toast.LENGTH_LONG).show();
-                // Show detailed results
+                Toast.makeText(this, "Pushed " + finalSuccess + " items successfully", Toast.LENGTH_LONG).show();
                 if (!results.isEmpty()) {
                     String summary = String.join("\n", results.subList(0, Math.min(5, results.size())));
                     android.util.Log.d("GitCode", "Push results:\n" + summary);
@@ -872,7 +881,19 @@ public class IDEActivity extends AppCompatActivity {
         for (File file : files) {
             if (file.isDirectory()) {
                 String newPath = relativePath.isEmpty() ? file.getName() : relativePath + "/" + file.getName();
-                success += pushDirectory(api, file, newPath, message, results);
+                
+                // Create .gitkeep file to preserve empty folders
+                File[] subFiles = file.listFiles();
+                if (subFiles == null || subFiles.length == 0) {
+                    String gitkeepPath = newPath + "/.gitkeep";
+                    String result = api.commitAndPush(gitkeepPath, "", message);
+                    results.add(gitkeepPath + ": " + result);
+                    if (result.contains("Success")) {
+                        success++;
+                    }
+                } else {
+                    success += pushDirectory(api, file, newPath, message, results);
+                }
             } else {
                 try {
                     FileInputStream fis = new FileInputStream(file);
