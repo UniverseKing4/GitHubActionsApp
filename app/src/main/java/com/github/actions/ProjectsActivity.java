@@ -62,6 +62,11 @@ public class ProjectsActivity extends AppCompatActivity {
         btnSettings.setOnClickListener(v -> showSettings());
         mainLayout.addView(btnSettings);
         
+        Button btnProfiles = new Button(this);
+        btnProfiles.setText("👤 GitHub Profiles");
+        btnProfiles.setOnClickListener(v -> showProfiles());
+        mainLayout.addView(btnProfiles);
+        
         Button btnDarkMode = new Button(this);
         btnDarkMode.setText(isDark ? "☀ Light Mode" : "🌙 Dark Mode");
         btnDarkMode.setOnClickListener(v -> {
@@ -306,6 +311,125 @@ public class ProjectsActivity extends AppCompatActivity {
                 .putString("token", etToken.getText().toString())
                 .apply();
             Toast.makeText(this, "Settings saved", Toast.LENGTH_SHORT).show();
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
+
+    private void showProfiles() {
+        SharedPreferences profilePrefs = getSharedPreferences("GitHubProfiles", MODE_PRIVATE);
+        String profiles = profilePrefs.getString("profiles", "");
+        String activeProfile = profilePrefs.getString("activeProfile", "");
+        
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("GitHub Profiles");
+        
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(20, 20, 20, 20);
+        
+        if (profiles.isEmpty()) {
+            TextView empty = new TextView(this);
+            empty.setText("No profiles yet");
+            empty.setPadding(20, 20, 20, 20);
+            layout.addView(empty);
+        } else {
+            for (String profile : profiles.split(";")) {
+                if (profile.isEmpty()) continue;
+                String[] parts = profile.split("\\|");
+                if (parts.length != 3) continue;
+                
+                String name = parts[0];
+                LinearLayout row = new LinearLayout(this);
+                row.setOrientation(LinearLayout.HORIZONTAL);
+                
+                Button btn = new Button(this);
+                btn.setText((name.equals(activeProfile) ? "✓ " : "") + name);
+                btn.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+                btn.setOnClickListener(v -> {
+                    profilePrefs.edit().putString("activeProfile", name).apply();
+                    SharedPreferences creds = getSharedPreferences("GitHubCreds", MODE_PRIVATE);
+                    creds.edit()
+                        .putString("username", parts[1])
+                        .putString("token", parts[2])
+                        .apply();
+                    Toast.makeText(this, "Active: " + name, Toast.LENGTH_SHORT).show();
+                    showProfiles();
+                });
+                row.addView(btn);
+                
+                Button btnDel = new Button(this);
+                btnDel.setText("🗑");
+                btnDel.setOnClickListener(v -> {
+                    String newProfiles = profiles.replace(profile + ";", "");
+                    profilePrefs.edit().putString("profiles", newProfiles).apply();
+                    if (name.equals(activeProfile)) {
+                        profilePrefs.edit().remove("activeProfile").apply();
+                    }
+                    showProfiles();
+                });
+                row.addView(btnDel);
+                
+                layout.addView(row);
+            }
+        }
+        
+        Button btnAdd = new Button(this);
+        btnAdd.setText("+ Add Profile");
+        btnAdd.setOnClickListener(v -> addProfile());
+        layout.addView(btnAdd);
+        
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(layout);
+        builder.setView(scroll);
+        builder.setNegativeButton("Close", null);
+        builder.show();
+    }
+
+    private void addProfile() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add GitHub Profile");
+        
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 20, 50, 20);
+        
+        EditText etName = new EditText(this);
+        etName.setHint("Profile Name");
+        layout.addView(etName);
+        
+        EditText etUser = new EditText(this);
+        etUser.setHint("Username");
+        layout.addView(etUser);
+        
+        EditText etToken = new EditText(this);
+        etToken.setHint("Token");
+        etToken.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        layout.addView(etToken);
+        
+        EditText etRepo = new EditText(this);
+        etRepo.setHint("Repository");
+        layout.addView(etRepo);
+        
+        builder.setView(layout);
+        builder.setPositiveButton("Add", (d, w) -> {
+            String name = etName.getText().toString().trim();
+            String user = etUser.getText().toString().trim();
+            String token = etToken.getText().toString().trim();
+            String repo = etRepo.getText().toString().trim();
+            
+            if (name.isEmpty() || user.isEmpty() || token.isEmpty() || repo.isEmpty()) {
+                Toast.makeText(this, "Fill all fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            SharedPreferences profilePrefs = getSharedPreferences("GitHubProfiles", MODE_PRIVATE);
+            String profiles = profilePrefs.getString("profiles", "");
+            profiles += name + "|" + user + "|" + token + "|" + repo + ";";
+            profilePrefs.edit().putString("profiles", profiles).apply();
+            
+            Toast.makeText(this, "Profile added", Toast.LENGTH_SHORT).show();
+            showProfiles();
         });
         builder.setNegativeButton("Cancel", null);
         builder.show();

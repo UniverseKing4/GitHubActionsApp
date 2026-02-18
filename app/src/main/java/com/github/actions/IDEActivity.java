@@ -1410,11 +1410,34 @@ public class IDEActivity extends AppCompatActivity {
         String username = prefs.getString("username", "");
         String token = prefs.getString("token", "");
         
+        // Get repo from active profile
+        SharedPreferences profilePrefs = getSharedPreferences("GitHubProfiles", MODE_PRIVATE);
+        String activeProfile = profilePrefs.getString("activeProfile", "");
+        String repo = "";
+        
+        if (!activeProfile.isEmpty()) {
+            String profiles = profilePrefs.getString("profiles", "");
+            for (String profile : profiles.split(";")) {
+                if (profile.isEmpty()) continue;
+                String[] parts = profile.split("\\|");
+                if (parts.length == 4 && parts[0].equals(activeProfile)) {
+                    repo = parts[3];
+                    break;
+                }
+            }
+        }
+        
         if (username.isEmpty() || token.isEmpty()) {
-            Toast.makeText(this, "Configure GitHub settings first", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Configure GitHub profile first", Toast.LENGTH_LONG).show();
             return;
         }
         
+        if (repo.isEmpty()) {
+            Toast.makeText(this, "No repository set in active profile", Toast.LENGTH_LONG).show();
+            return;
+        }
+        
+        String finalRepo = repo;
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Commit & Push");
         EditText input = new EditText(this);
@@ -1430,7 +1453,7 @@ public class IDEActivity extends AppCompatActivity {
         builder.setPositiveButton("Push", (d, w) -> {
             String message = input.getText().toString();
             if (message.isEmpty()) message = "Update project";
-            pushAllToGitHub(username, token, projectName, message);
+            pushAllToGitHub(username, token, finalRepo, message);
         });
         builder.setNegativeButton("Cancel", null);
         builder.show();
