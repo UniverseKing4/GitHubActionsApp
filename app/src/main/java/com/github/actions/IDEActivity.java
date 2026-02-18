@@ -1005,8 +1005,8 @@ public class IDEActivity extends AppCompatActivity {
             if (name.isEmpty()) return;
             
             File folder = new File(parent, name);
-            if (folder.exists() && folder.isDirectory()) {
-                Toast.makeText(this, "Folder already exists", Toast.LENGTH_SHORT).show();
+            if (folder.exists()) {
+                Toast.makeText(this, "Cannot create - name already in use", Toast.LENGTH_SHORT).show();
                 return;
             }
             
@@ -1130,8 +1130,8 @@ public class IDEActivity extends AppCompatActivity {
             if (name.isEmpty()) return;
             
             File folder = new File(projectPath, name);
-            if (folder.exists() && folder.isDirectory()) {
-                Toast.makeText(this, "Folder already exists", Toast.LENGTH_SHORT).show();
+            if (folder.exists()) {
+                Toast.makeText(this, "Cannot create - name already in use", Toast.LENGTH_SHORT).show();
                 return;
             }
             
@@ -1355,8 +1355,8 @@ public class IDEActivity extends AppCompatActivity {
             if (name.isEmpty()) return;
             
             File file = new File(projectPath, name);
-            if (file.exists() && file.isFile()) {
-                Toast.makeText(this, "File already exists", Toast.LENGTH_SHORT).show();
+            if (file.exists()) {
+                Toast.makeText(this, "Cannot create - name already in use", Toast.LENGTH_SHORT).show();
                 return;
             }
             
