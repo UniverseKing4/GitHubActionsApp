@@ -203,12 +203,6 @@ public class IDEActivity extends AppCompatActivity {
                 // Update line numbers
                 updateLineNumbers(lineNumbers, text);
                 
-                // Sync scroll
-                editorScroll.post(() -> {
-                    int scrollY = editorScroll.getScrollY();
-                    lineNumberScroll.scrollTo(0, scrollY);
-                });
-                
                 // Trigger auto-save after 2 seconds of inactivity
                 autoSaveHandler.removeCallbacks(autoSaveRunnable);
                 autoSaveHandler.postDelayed(autoSaveRunnable, 2000);
@@ -342,6 +336,12 @@ public class IDEActivity extends AppCompatActivity {
         
         editorScroll.addView(editor);
         editorContainer.addView(editorScroll);
+        
+        // Sync scroll on touch
+        editorScroll.getViewTreeObserver().addOnScrollChangedListener(() -> {
+            int scrollY = editorScroll.getScrollY();
+            lineNumberScroll.scrollTo(0, scrollY);
+        });
         
         mainLayout.addView(editorContainer);
         
