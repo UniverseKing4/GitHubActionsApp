@@ -57,13 +57,8 @@ public class ProjectsActivity extends AppCompatActivity {
         btnNew.setOnClickListener(v -> createProject());
         mainLayout.addView(btnNew);
         
-        Button btnSettings = new Button(this);
-        btnSettings.setText("⚙ GitHub Settings");
-        btnSettings.setOnClickListener(v -> showSettings());
-        mainLayout.addView(btnSettings);
-        
         Button btnProfiles = new Button(this);
-        btnProfiles.setText("👤 GitHub Profiles");
+        btnProfiles.setText("⚙ GitHub Profiles");
         btnProfiles.setOnClickListener(v -> showProfiles());
         mainLayout.addView(btnProfiles);
         
@@ -282,38 +277,6 @@ public class ProjectsActivity extends AppCompatActivity {
         intent.putExtra("projectName", name);
         intent.putExtra("projectPath", path);
         startActivity(intent);
-    }
-
-    private void showSettings() {
-        SharedPreferences creds = getSharedPreferences("GitHubCreds", MODE_PRIVATE);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("GitHub Settings");
-        
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(50, 40, 50, 10);
-
-        EditText etUser = new EditText(this);
-        etUser.setHint("Username");
-        etUser.setText(creds.getString("username", ""));
-        layout.addView(etUser);
-
-        EditText etToken = new EditText(this);
-        etToken.setHint("Token");
-        etToken.setText(creds.getString("token", ""));
-        etToken.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        layout.addView(etToken);
-
-        builder.setView(layout);
-        builder.setPositiveButton("Save", (d, w) -> {
-            creds.edit()
-                .putString("username", etUser.getText().toString())
-                .putString("token", etToken.getText().toString())
-                .apply();
-            Toast.makeText(this, "Settings saved", Toast.LENGTH_SHORT).show();
-        });
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
     }
 
     private void showProfiles() {
