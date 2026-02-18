@@ -25,6 +25,9 @@ public class IDEActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private LinearLayout fileList;
     private EditText editor;
+    private TextView lineNumbers;
+    private ScrollView editorScroll;
+    private ScrollView lineNumberScroll;
     private String projectName, projectPath;
     private File currentFile;
     private SharedPreferences prefs;
@@ -91,14 +94,14 @@ public class IDEActivity extends AppCompatActivity {
         }
         
         // Line numbers
-        ScrollView lineNumberScroll = new ScrollView(this);
+        lineNumberScroll = new ScrollView(this);
         lineNumberScroll.setVerticalScrollBarEnabled(false);
         LinearLayout.LayoutParams lineNumParams = new LinearLayout.LayoutParams(
             (int)(30 * getResources().getDisplayMetrics().density),
             LinearLayout.LayoutParams.MATCH_PARENT);
         lineNumberScroll.setLayoutParams(lineNumParams);
         
-        TextView lineNumbers = new TextView(this);
+        lineNumbers = new TextView(this);
         lineNumbers.setTypeface(android.graphics.Typeface.MONOSPACE);
         lineNumbers.setTextSize(14);
         lineNumbers.setGravity(Gravity.TOP | Gravity.END);
@@ -112,7 +115,7 @@ public class IDEActivity extends AppCompatActivity {
         lineNumberScroll.addView(lineNumbers);
         editorContainer.addView(lineNumberScroll);
         
-        ScrollView editorScroll = new ScrollView(this);
+        editorScroll = new ScrollView(this);
         editorScroll.setVerticalScrollBarEnabled(false);
         LinearLayout.LayoutParams editorScrollParams = new LinearLayout.LayoutParams(
             0,
