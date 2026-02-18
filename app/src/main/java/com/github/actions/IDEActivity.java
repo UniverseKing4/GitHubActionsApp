@@ -60,7 +60,7 @@ public class IDEActivity extends AppCompatActivity {
         // Line numbers
         ScrollView lineNumberScroll = new ScrollView(this);
         LinearLayout.LayoutParams lineNumParams = new LinearLayout.LayoutParams(
-            (int)(50 * getResources().getDisplayMetrics().density),
+            (int)(40 * getResources().getDisplayMetrics().density),
             LinearLayout.LayoutParams.MATCH_PARENT);
         lineNumberScroll.setLayoutParams(lineNumParams);
         
@@ -101,6 +101,7 @@ public class IDEActivity extends AppCompatActivity {
         editor.addTextChangedListener(new android.text.TextWatcher() {
             private String before = "";
             private int cursorPos = 0;
+            private boolean isProcessing = false;
             
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 before = s.toString();
@@ -110,6 +111,9 @@ public class IDEActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
             
             public void afterTextChanged(android.text.Editable s) {
+                if (isProcessing) return;
+                isProcessing = true;
+                
                 String text = s.toString();
                 
                 // Update line numbers
@@ -121,9 +125,41 @@ public class IDEActivity extends AppCompatActivity {
                     lineNumberScroll.scrollTo(0, scrollY);
                 });
                 
+                int selection = editor.getSelectionStart();
+                
+                // Smart bracket handling - Enter between brackets
+                if (text.length() > before.length() && selection > 0 && selection < text.length()) {
+                    if (text.charAt(selection - 1) == '\n') {
+                        char prevChar = selection > 1 ? text.charAt(selection - 2) : 0;
+                        char nextChar = text.charAt(selection);
+                        
+                        if ((prevChar == '{' && nextChar == '}') ||
+                            (prevChar == '[' && nextChar == ']') ||
+                            (prevChar == '(' && nextChar == ')')) {
+                            
+                            // Get indent of previous line
+                            String[] lines = text.substring(0, selection - 1).split("\n");
+                            String lastLine = lines.length > 0 ? lines[lines.length - 1] : "";
+                            int indent = 0;
+                            for (char c : lastLine.toCharArray()) {
+                                if (c == ' ' || c == '\t') indent++;
+                                else break;
+                            }
+                            
+                            String indentStr = new String(new char[indent + 4]).replace('\0', ' ');
+                            String closeIndent = new String(new char[indent]).replace('\0', ' ');
+                            
+                            s.insert(selection, indentStr + "\n" + closeIndent);
+                            editor.setSelection(selection + indentStr.length());
+                            isProcessing = false;
+                            return;
+                        }
+                    }
+                }
+                
                 // Auto-indent on new line
-                if (text.length() > before.length() && cursorPos < text.length() && text.charAt(cursorPos) == '\n') {
-                    String[] lines = before.substring(0, cursorPos).split("\n");
+                if (text.length() > before.length() && selection > 0 && text.charAt(selection - 1) == '\n') {
+                    String[] lines = text.substring(0, selection - 1).split("\n");
                     if (lines.length > 0) {
                         String lastLine = lines[lines.length - 1];
                         int indent = 0;
@@ -139,16 +175,15 @@ public class IDEActivity extends AppCompatActivity {
                         
                         if (indent > 0) {
                             String indentStr = new String(new char[indent]).replace('\0', ' ');
-                            int pos = cursorPos + 1;
-                            s.insert(pos, indentStr);
-                            editor.setSelection(pos + indent);
+                            s.insert(selection, indentStr);
+                            editor.setSelection(selection + indent);
                         }
                     }
                 }
                 
                 // Auto-close brackets
-                if (text.length() > before.length() && cursorPos < text.length()) {
-                    char typed = text.charAt(cursorPos);
+                else if (text.length() > before.length() && selection > 0) {
+                    char typed = text.charAt(selection - 1);
                     char closing = 0;
                     
                     switch (typed) {
@@ -160,13 +195,14 @@ public class IDEActivity extends AppCompatActivity {
                     }
                     
                     if (closing != 0) {
-                        int pos = cursorPos + 1;
-                        if (pos >= text.length() || !Character.isLetterOrDigit(text.charAt(pos))) {
-                            s.insert(pos, String.valueOf(closing));
-                            editor.setSelection(pos);
+                        if (selection >= text.length() || !Character.isLetterOrDigit(text.charAt(selection))) {
+                            s.insert(selection, String.valueOf(closing));
+                            editor.setSelection(selection);
                         }
                     }
                 }
+                
+                isProcessing = false;
             }
         });
         
