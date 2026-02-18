@@ -1291,6 +1291,7 @@ public class IDEActivity extends AppCompatActivity {
         builder.setTitle("New File");
         EditText input = new EditText(this);
         input.setHint("filename.ext");
+        input.requestFocus();
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -1306,10 +1307,13 @@ public class IDEActivity extends AppCompatActivity {
                 if (file.createNewFile()) {
                     currentFile = file;
                     editor.setText("");
+                    undoStack.clear();
+                    redoStack.clear();
                     if (getSupportActionBar() != null) {
                         getSupportActionBar().setSubtitle(name);
                     }
                     loadFiles();
+                    Toast.makeText(this, "Created", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(this, "File already exists", Toast.LENGTH_SHORT).show();
                 }
@@ -1327,14 +1331,8 @@ public class IDEActivity extends AppCompatActivity {
             return;
         }
         
-        try {
-            FileOutputStream fos = new FileOutputStream(currentFile);
-            fos.write(editor.getText().toString().getBytes());
-            fos.close();
-            Toast.makeText(this, "Saved ✓", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+        autoSaveFile();
+        Toast.makeText(this, "Saved ✓", Toast.LENGTH_SHORT).show();
     }
 
     private void autoSaveFile() {
@@ -1344,13 +1342,16 @@ public class IDEActivity extends AppCompatActivity {
             FileOutputStream fos = new FileOutputStream(currentFile);
             fos.write(editor.getText().toString().getBytes());
             fos.close();
-            // Silent auto-save, no toast
         } catch (Exception e) {
-            // Silent fail
+            // Silent fail for auto-save
         }
     }
 
     private void commitAndPushAll() {
+        if (currentFile != null) {
+            autoSaveFile();
+        }
+        
         String username = prefs.getString("username", "");
         String token = prefs.getString("token", "");
         
@@ -1359,14 +1360,12 @@ public class IDEActivity extends AppCompatActivity {
             return;
         }
         
-        if (currentFile != null) {
-            saveCurrentFile();
-        }
-        
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Commit & Push All Files");
+        builder.setTitle("Commit & Push");
         EditText input = new EditText(this);
         input.setHint("Commit message");
+        input.setText("Update project");
+        input.setSelection(input.getText().length());
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -1383,7 +1382,7 @@ public class IDEActivity extends AppCompatActivity {
     }
 
     private void pushAllToGitHub(String username, String token, String repo, String message) {
-        Toast.makeText(this, "Syncing changes...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Pushing changes...", Toast.LENGTH_SHORT).show();
         executor.execute(() -> {
             GitHubAPI api = new GitHubAPI(username, token, repo);
             File dir = new File(projectPath);
