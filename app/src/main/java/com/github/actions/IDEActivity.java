@@ -1409,9 +1409,8 @@ public class IDEActivity extends AppCompatActivity {
         
         String username = prefs.getString("username", "");
         String token = prefs.getString("token", "");
-        String repo = prefs.getString("repo", "");
         
-        if (username.isEmpty() || token.isEmpty() || repo.isEmpty()) {
+        if (username.isEmpty() || token.isEmpty()) {
             Toast.makeText(this, "Configure GitHub profile first", Toast.LENGTH_LONG).show();
             return;
         }
@@ -1431,7 +1430,7 @@ public class IDEActivity extends AppCompatActivity {
         builder.setPositiveButton("Push", (d, w) -> {
             String message = input.getText().toString();
             if (message.isEmpty()) message = "Update project";
-            pushAllToGitHub(username, token, repo, message);
+            pushAllToGitHub(username, token, projectName, message);
         });
         builder.setNegativeButton("Cancel", null);
         builder.show();

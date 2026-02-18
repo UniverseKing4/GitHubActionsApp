@@ -337,7 +337,7 @@ public class ProjectsActivity extends AppCompatActivity {
             for (String profile : profiles.split(";")) {
                 if (profile.isEmpty()) continue;
                 String[] parts = profile.split("\\|");
-                if (parts.length != 3) continue;
+                if (parts.length != 2) continue;
                 
                 String username = parts[0];
                 LinearLayout row = new LinearLayout(this);
@@ -352,7 +352,6 @@ public class ProjectsActivity extends AppCompatActivity {
                     creds.edit()
                         .putString("username", parts[0])
                         .putString("token", parts[1])
-                        .putString("repo", parts[2])
                         .apply();
                     Toast.makeText(this, "Active: " + username, Toast.LENGTH_SHORT).show();
                     showProfiles();
@@ -404,24 +403,19 @@ public class ProjectsActivity extends AppCompatActivity {
         etToken.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
         layout.addView(etToken);
         
-        EditText etRepo = new EditText(this);
-        etRepo.setHint("Repository");
-        layout.addView(etRepo);
-        
         builder.setView(layout);
         builder.setPositiveButton("Add", (d, w) -> {
             String user = etUser.getText().toString().trim();
             String token = etToken.getText().toString().trim();
-            String repo = etRepo.getText().toString().trim();
             
-            if (user.isEmpty() || token.isEmpty() || repo.isEmpty()) {
+            if (user.isEmpty() || token.isEmpty()) {
                 Toast.makeText(this, "Fill all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
             
             SharedPreferences profilePrefs = getSharedPreferences("GitHubProfiles", MODE_PRIVATE);
             String profiles = profilePrefs.getString("profiles", "");
-            profiles += user + "|" + token + "|" + repo + ";";
+            profiles += user + "|" + token + ";";
             profilePrefs.edit().putString("profiles", profiles).apply();
             
             Toast.makeText(this, "Profile added", Toast.LENGTH_SHORT).show();
