@@ -57,10 +57,36 @@ public class IDEActivity extends AppCompatActivity {
         
         // Main editor area
         LinearLayout mainLayout = new LinearLayout(this);
-        mainLayout.setOrientation(LinearLayout.HORIZONTAL);
+        mainLayout.setOrientation(LinearLayout.VERTICAL);
         mainLayout.setLayoutParams(new DrawerLayout.LayoutParams(
             DrawerLayout.LayoutParams.MATCH_PARENT,
             DrawerLayout.LayoutParams.MATCH_PARENT));
+        
+        // Toolbar with quick actions
+        LinearLayout toolbar = new LinearLayout(this);
+        toolbar.setOrientation(LinearLayout.HORIZONTAL);
+        toolbar.setBackgroundColor(0xFFF0F0F0);
+        toolbar.setPadding(5, 5, 5, 5);
+        toolbar.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT));
+        
+        addToolbarButton(toolbar, "💾", "Save", v -> saveCurrentFile());
+        addToolbarButton(toolbar, "↶", "Undo", v -> undo());
+        addToolbarButton(toolbar, "↷", "Redo", v -> redo());
+        addToolbarButton(toolbar, "🔍", "Find", v -> showFindDialog());
+        addToolbarButton(toolbar, "⇄", "Replace", v -> showReplaceDialog());
+        addToolbarButton(toolbar, "🚀", "Push", v -> commitAndPushAll());
+        
+        mainLayout.addView(toolbar);
+        
+        // Editor container
+        LinearLayout editorContainer = new LinearLayout(this);
+        editorContainer.setOrientation(LinearLayout.HORIZONTAL);
+        editorContainer.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            0,
+            1));
         
         // Line numbers
         ScrollView lineNumberScroll = new ScrollView(this);
@@ -83,7 +109,7 @@ public class IDEActivity extends AppCompatActivity {
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT));
         lineNumberScroll.addView(lineNumbers);
-        mainLayout.addView(lineNumberScroll);
+        editorContainer.addView(lineNumberScroll);
         
         ScrollView editorScroll = new ScrollView(this);
         editorScroll.setVerticalScrollBarEnabled(false);
@@ -279,7 +305,9 @@ public class IDEActivity extends AppCompatActivity {
         });
         
         editorScroll.addView(editor);
-        mainLayout.addView(editorScroll);
+        editorContainer.addView(editorScroll);
+        
+        mainLayout.addView(editorContainer);
         
         // File drawer
         LinearLayout drawer = new LinearLayout(this);
@@ -350,14 +378,11 @@ public class IDEActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, 1, 0, "Save");
-        menu.add(0, 2, 0, "Undo");
-        menu.add(0, 3, 0, "Redo");
-        menu.add(0, 4, 0, "Find");
-        menu.add(0, 5, 0, "Replace");
-        menu.add(0, 6, 0, "Go to Line");
-        menu.add(0, 7, 0, "Select All");
-        menu.add(0, 8, 0, "Commit & Push All");
+        menu.add(0, 1, 0, "Go to Line");
+        menu.add(0, 2, 0, "Select All");
+        menu.add(0, 3, 0, "Duplicate Line");
+        menu.add(0, 4, 0, "Delete Line");
+        menu.add(0, 5, 0, "Comment/Uncomment");
         return true;
     }
 
@@ -372,31 +397,85 @@ public class IDEActivity extends AppCompatActivity {
                 }
                 return true;
             case 1:
-                saveCurrentFile();
-                return true;
-            case 2:
-                undo();
-                return true;
-            case 3:
-                redo();
-                return true;
-            case 4:
-                showFindDialog();
-                return true;
-            case 5:
-                showReplaceDialog();
-                return true;
-            case 6:
                 showGoToLineDialog();
                 return true;
-            case 7:
+            case 2:
                 editor.selectAll();
                 return true;
-            case 8:
-                commitAndPushAll();
+            case 3:
+                duplicateLine();
+                return true;
+            case 4:
+                deleteLine();
+                return true;
+            case 5:
+                toggleComment();
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void duplicateLine() {
+        int start = editor.getSelectionStart();
+        String text = editor.getText().toString();
+        
+        // Find current line
+        int lineStart = text.lastIndexOf('\n', start - 1) + 1;
+        int lineEnd = text.indexOf('\n', start);
+        if (lineEnd == -1) lineEnd = text.length();
+        
+        String line = text.substring(lineStart, lineEnd);
+        editor.getText().insert(lineEnd, "\n" + line);
+        Toast.makeText(this, "Line duplicated", Toast.LENGTH_SHORT).show();
+    }
+
+    private void deleteLine() {
+        int start = editor.getSelectionStart();
+        String text = editor.getText().toString();
+        
+        // Find current line
+        int lineStart = text.lastIndexOf('\n', start - 1) + 1;
+        int lineEnd = text.indexOf('\n', start);
+        if (lineEnd == -1) lineEnd = text.length();
+        else lineEnd++; // Include newline
+        
+        editor.getText().delete(lineStart, lineEnd);
+        Toast.makeText(this, "Line deleted", Toast.LENGTH_SHORT).show();
+    }
+
+    private void toggleComment() {
+        if (currentFile == null) return;
+        
+        String commentPrefix = "// ";
+        if (currentFile.getName().endsWith(".py") || currentFile.getName().endsWith(".sh")) {
+            commentPrefix = "# ";
+        } else if (currentFile.getName().endsWith(".html") || currentFile.getName().endsWith(".xml")) {
+            commentPrefix = "<!-- ";
+        }
+        
+        int start = editor.getSelectionStart();
+        String text = editor.getText().toString();
+        
+        // Find current line
+        int lineStart = text.lastIndexOf('\n', start - 1) + 1;
+        int lineEnd = text.indexOf('\n', start);
+        if (lineEnd == -1) lineEnd = text.length();
+        
+        String line = text.substring(lineStart, lineEnd);
+        String trimmed = line.trim();
+        
+        if (trimmed.startsWith(commentPrefix.trim())) {
+            // Uncomment
+            int commentStart = line.indexOf(commentPrefix.trim());
+            editor.getText().delete(lineStart + commentStart, lineStart + commentStart + commentPrefix.length());
+        } else {
+            // Comment
+            int firstNonSpace = 0;
+            while (firstNonSpace < line.length() && line.charAt(firstNonSpace) == ' ') {
+                firstNonSpace++;
+            }
+            editor.getText().insert(lineStart + firstNonSpace, commentPrefix);
+        }
     }
 
     private void undo() {
@@ -1032,6 +1111,22 @@ public class IDEActivity extends AppCompatActivity {
                 lineNumbers.setMinHeight(editorHeight);
             }
         });
+    }
+
+    private void addToolbarButton(LinearLayout toolbar, String icon, String hint, View.OnClickListener listener) {
+        android.widget.Button btn = new android.widget.Button(this);
+        btn.setText(icon);
+        btn.setTextSize(16);
+        btn.setPadding(15, 5, 15, 5);
+        btn.setOnClickListener(listener);
+        btn.setBackgroundColor(0xFFE0E0E0);
+        btn.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT));
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) btn.getLayoutParams();
+        params.setMargins(3, 0, 3, 0);
+        btn.setLayoutParams(params);
+        toolbar.addView(btn);
     }
 
     private void applySyntaxHighlighting(String fileName, String content) {
