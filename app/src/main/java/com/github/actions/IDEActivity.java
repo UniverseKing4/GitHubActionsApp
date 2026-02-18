@@ -64,6 +64,7 @@ public class IDEActivity extends AppCompatActivity {
         
         // Line numbers
         ScrollView lineNumberScroll = new ScrollView(this);
+        lineNumberScroll.setVerticalScrollBarEnabled(false);
         LinearLayout.LayoutParams lineNumParams = new LinearLayout.LayoutParams(
             (int)(30 * getResources().getDisplayMetrics().density),
             LinearLayout.LayoutParams.MATCH_PARENT);
@@ -77,6 +78,7 @@ public class IDEActivity extends AppCompatActivity {
         lineNumbers.setBackgroundColor(0xFFF5F5F5);
         lineNumbers.setTextColor(0xFF999999);
         lineNumbers.setLineSpacing(0, 1.0f);
+        lineNumbers.setMinHeight(0);
         lineNumbers.setLayoutParams(new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -84,6 +86,7 @@ public class IDEActivity extends AppCompatActivity {
         mainLayout.addView(lineNumberScroll);
         
         ScrollView editorScroll = new ScrollView(this);
+        editorScroll.setVerticalScrollBarEnabled(false);
         LinearLayout.LayoutParams editorScrollParams = new LinearLayout.LayoutParams(
             0,
             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -105,6 +108,18 @@ public class IDEActivity extends AppCompatActivity {
         editor.setBackgroundColor(0xFFFFFFFF);
         editor.setTextColor(0xFF000000);
         editor.setHighlightColor(0x6633B5E5);
+        editor.setVerticalScrollBarEnabled(false);
+        
+        // Tab key support
+        editor.setOnKeyListener((v, keyCode, event) -> {
+            if (event.getAction() == android.view.KeyEvent.ACTION_DOWN && keyCode == android.view.KeyEvent.KEYCODE_TAB) {
+                int start = editor.getSelectionStart();
+                int end = editor.getSelectionEnd();
+                editor.getText().replace(Math.min(start, end), Math.max(start, end), "    ");
+                return true;
+            }
+            return false;
+        });
         
         // Auto-save setup
         autoSaveRunnable = () -> {
@@ -341,7 +356,8 @@ public class IDEActivity extends AppCompatActivity {
         menu.add(0, 4, 0, "Find");
         menu.add(0, 5, 0, "Replace");
         menu.add(0, 6, 0, "Go to Line");
-        menu.add(0, 7, 0, "Commit & Push All");
+        menu.add(0, 7, 0, "Select All");
+        menu.add(0, 8, 0, "Commit & Push All");
         return true;
     }
 
@@ -374,6 +390,9 @@ public class IDEActivity extends AppCompatActivity {
                 showGoToLineDialog();
                 return true;
             case 7:
+                editor.selectAll();
+                return true;
+            case 8:
                 commitAndPushAll();
                 return true;
         }
@@ -1000,9 +1019,19 @@ public class IDEActivity extends AppCompatActivity {
         int lines = text.isEmpty() ? 1 : text.split("\n", -1).length;
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i <= lines; i++) {
-            sb.append(i).append("\n");
+            sb.append(i);
+            if (i < lines) sb.append("\n");
         }
         lineNumbers.setText(sb.toString());
+        
+        // Match height with editor content
+        lineNumbers.post(() -> {
+            int editorHeight = editor.getHeight();
+            int lineNumberHeight = lineNumbers.getHeight();
+            if (editorHeight > lineNumberHeight) {
+                lineNumbers.setMinHeight(editorHeight);
+            }
+        });
     }
 
     private void applySyntaxHighlighting(String fileName, String content) {
