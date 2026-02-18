@@ -113,19 +113,42 @@ public class IDEActivity extends AppCompatActivity {
         editor.setLineSpacing(0, 1.0f);
         editor.setGravity(Gravity.TOP | Gravity.START);
         editor.setPadding(10, 20, 15, 20);
-        editor.setHorizontallyScrolling(true);
+        editor.setHorizontallyScrolling(false); // Enable word wrap
         editor.setBackgroundColor(0xFFFFFFFF);
         editor.setTextColor(0xFF000000);
         editor.setHighlightColor(0x6633B5E5);
         editor.setVerticalScrollBarEnabled(false);
         
-        // Tab key support
+        // Tab key support and keyboard shortcuts
         editor.setOnKeyListener((v, keyCode, event) -> {
-            if (event.getAction() == android.view.KeyEvent.ACTION_DOWN && keyCode == android.view.KeyEvent.KEYCODE_TAB) {
-                int start = editor.getSelectionStart();
-                int end = editor.getSelectionEnd();
-                editor.getText().replace(Math.min(start, end), Math.max(start, end), "    ");
-                return true;
+            if (event.getAction() == android.view.KeyEvent.ACTION_DOWN) {
+                // Tab key
+                if (keyCode == android.view.KeyEvent.KEYCODE_TAB) {
+                    int start = editor.getSelectionStart();
+                    int end = editor.getSelectionEnd();
+                    editor.getText().replace(Math.min(start, end), Math.max(start, end), "    ");
+                    return true;
+                }
+                // Ctrl+S to save
+                if (keyCode == android.view.KeyEvent.KEYCODE_S && event.isCtrlPressed()) {
+                    saveCurrentFile();
+                    return true;
+                }
+                // Ctrl+Z to undo
+                if (keyCode == android.view.KeyEvent.KEYCODE_Z && event.isCtrlPressed()) {
+                    undo();
+                    return true;
+                }
+                // Ctrl+Y to redo
+                if (keyCode == android.view.KeyEvent.KEYCODE_Y && event.isCtrlPressed()) {
+                    redo();
+                    return true;
+                }
+                // Ctrl+F to find
+                if (keyCode == android.view.KeyEvent.KEYCODE_F && event.isCtrlPressed()) {
+                    showFindDialog();
+                    return true;
+                }
             }
             return false;
         });
@@ -389,6 +412,7 @@ public class IDEActivity extends AppCompatActivity {
         menu.add(0, 4, 0, "Select All");
         menu.add(0, 5, 0, "Duplicate Line");
         menu.add(0, 6, 0, "Delete Line");
+        menu.add(0, 7, 0, "Word Wrap: ON");
         return true;
     }
 
@@ -420,8 +444,18 @@ public class IDEActivity extends AppCompatActivity {
             case 6:
                 deleteLine();
                 return true;
+            case 7:
+                toggleWordWrap(item);
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void toggleWordWrap(MenuItem item) {
+        boolean isWrapping = !editor.getHorizontallyScrolling();
+        editor.setHorizontallyScrolling(isWrapping);
+        item.setTitle(isWrapping ? "Word Wrap: OFF" : "Word Wrap: ON");
+        Toast.makeText(this, isWrapping ? "Word wrap disabled" : "Word wrap enabled", Toast.LENGTH_SHORT).show();
     }
 
     private void duplicateLine() {
