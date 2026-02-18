@@ -1404,7 +1404,10 @@ public class IDEActivity extends AppCompatActivity {
                 if (!currentFiles.contains(oldFile)) {
                     String result = api.deleteFile(oldFile, message);
                     if (result.contains("Success")) {
-                        deleted++;
+                        // Only count non-.gitkeep files
+                        if (!oldFile.endsWith("/.gitkeep")) {
+                            deleted++;
+                        }
                         results.add(oldFile + ": Deleted");
                         pushPrefs.edit().remove(oldFile).apply();
                     }
@@ -1455,7 +1458,7 @@ public class IDEActivity extends AppCompatActivity {
                         String result = api.commitAndPush(gitkeepPath, "", message);
                         if (result.contains("Success")) {
                             pushPrefs.edit().putLong(gitkeepPath, System.currentTimeMillis()).apply();
-                            success++;
+                            // Don't count .gitkeep in success count
                         }
                     }
                 } else {
