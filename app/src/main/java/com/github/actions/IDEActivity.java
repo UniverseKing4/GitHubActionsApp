@@ -36,6 +36,8 @@ public class IDEActivity extends AppCompatActivity {
     private java.util.Stack<String> undoStack = new java.util.Stack<>();
     private java.util.Stack<String> redoStack = new java.util.Stack<>();
     private boolean isUndoRedo = false;
+    private long lastEditTime = 0;
+    private static final long UNDO_DELAY = 1000; // 1 second
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,10 +169,20 @@ public class IDEActivity extends AppCompatActivity {
                 autoSaveHandler.removeCallbacks(autoSaveRunnable);
                 autoSaveHandler.postDelayed(autoSaveRunnable, 2000);
                 
-                // Track for undo/redo
+                // Track for undo/redo with time-based grouping
                 if (!isUndoRedo && !text.equals(before)) {
-                    undoStack.push(before);
-                    if (undoStack.size() > 50) undoStack.remove(0);
+                    long currentTime = System.currentTimeMillis();
+                    if (currentTime - lastEditTime > UNDO_DELAY || undoStack.isEmpty()) {
+                        undoStack.push(before);
+                        if (undoStack.size() > 50) undoStack.remove(0);
+                    } else {
+                        // Replace last entry if within time window
+                        if (!undoStack.isEmpty()) {
+                            undoStack.pop();
+                        }
+                        undoStack.push(before);
+                    }
+                    lastEditTime = currentTime;
                     redoStack.clear();
                 }
                 
@@ -378,7 +390,6 @@ public class IDEActivity extends AppCompatActivity {
         menu.add(0, 4, 0, "Select All");
         menu.add(0, 5, 0, "Duplicate Line");
         menu.add(0, 6, 0, "Delete Line");
-        menu.add(0, 7, 0, "Comment/Uncomment");
         return true;
     }
 
@@ -410,9 +421,6 @@ public class IDEActivity extends AppCompatActivity {
             case 6:
                 deleteLine();
                 return true;
-            case 7:
-                toggleComment();
-                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -443,41 +451,6 @@ public class IDEActivity extends AppCompatActivity {
         
         editor.getText().delete(lineStart, lineEnd);
         Toast.makeText(this, "Line deleted", Toast.LENGTH_SHORT).show();
-    }
-
-    private void toggleComment() {
-        if (currentFile == null) return;
-        
-        String commentPrefix = "// ";
-        if (currentFile.getName().endsWith(".py") || currentFile.getName().endsWith(".sh")) {
-            commentPrefix = "# ";
-        } else if (currentFile.getName().endsWith(".html") || currentFile.getName().endsWith(".xml")) {
-            commentPrefix = "<!-- ";
-        }
-        
-        int start = editor.getSelectionStart();
-        String text = editor.getText().toString();
-        
-        // Find current line
-        int lineStart = text.lastIndexOf('\n', start - 1) + 1;
-        int lineEnd = text.indexOf('\n', start);
-        if (lineEnd == -1) lineEnd = text.length();
-        
-        String line = text.substring(lineStart, lineEnd);
-        String trimmed = line.trim();
-        
-        if (trimmed.startsWith(commentPrefix.trim())) {
-            // Uncomment
-            int commentStart = line.indexOf(commentPrefix.trim());
-            editor.getText().delete(lineStart + commentStart, lineStart + commentStart + commentPrefix.length());
-        } else {
-            // Comment
-            int firstNonSpace = 0;
-            while (firstNonSpace < line.length() && line.charAt(firstNonSpace) == ' ') {
-                firstNonSpace++;
-            }
-            editor.getText().insert(lineStart + firstNonSpace, commentPrefix);
-        }
     }
 
     private void undo() {
@@ -559,10 +532,20 @@ public class IDEActivity extends AppCompatActivity {
             String replace = replaceInput.getText().toString();
             if (!find.isEmpty()) {
                 String text = editor.getText().toString();
-                String newText = text.replace(find, replace);
-                int count = (text.length() - newText.length()) / Math.max(1, find.length() - replace.length());
-                editor.setText(newText);
-                Toast.makeText(this, "Replaced " + count + " occurrences", Toast.LENGTH_SHORT).show();
+                int count = 0;
+                int index = 0;
+                while ((index = text.indexOf(find, index)) != -1) {
+                    count++;
+                    index += find.length();
+                }
+                
+                if (count > 0) {
+                    String newText = text.replace(find, replace);
+                    editor.setText(newText);
+                    Toast.makeText(this, "Replaced " + count + " occurrences", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "No occurrences found", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         builder.setNegativeButton("Cancel", null);
