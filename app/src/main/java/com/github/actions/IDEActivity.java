@@ -963,6 +963,15 @@ public class IDEActivity extends AppCompatActivity {
             if (name.isEmpty()) return;
             
             File folder = new File(parent, name);
+            if (folder.exists()) {
+                if (folder.isFile()) {
+                    Toast.makeText(this, "A file with this name exists", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Folder already exists", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+            
             if (folder.mkdirs()) {
                 loadFiles();
                 Toast.makeText(this, "Folder created", Toast.LENGTH_SHORT).show();
@@ -1083,6 +1092,15 @@ public class IDEActivity extends AppCompatActivity {
             if (name.isEmpty()) return;
             
             File folder = new File(projectPath, name);
+            if (folder.exists()) {
+                if (folder.isFile()) {
+                    Toast.makeText(this, "A file with this name exists", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Folder already exists", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+            
             if (folder.mkdirs()) {
                 loadFiles();
                 Toast.makeText(this, "Folder created", Toast.LENGTH_SHORT).show();
@@ -1303,6 +1321,15 @@ public class IDEActivity extends AppCompatActivity {
             if (name.isEmpty()) return;
             
             File file = new File(projectPath, name);
+            if (file.exists()) {
+                if (file.isDirectory()) {
+                    Toast.makeText(this, "A folder with this name exists", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "File already exists", Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+            
             try {
                 if (file.createNewFile()) {
                     currentFile = file;
@@ -1314,8 +1341,6 @@ public class IDEActivity extends AppCompatActivity {
                     }
                     loadFiles();
                     Toast.makeText(this, "Created", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "File already exists", Toast.LENGTH_SHORT).show();
                 }
             } catch (Exception e) {
                 Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -1407,8 +1432,10 @@ public class IDEActivity extends AppCompatActivity {
                 if (!currentFiles.contains(oldFile)) {
                     String result = api.deleteFile(oldFile, message);
                     if (result.contains("Success")) {
-                        // Only count non-.gitkeep files
-                        if (!oldFile.endsWith("/.gitkeep")) {
+                        // Count .gitkeep deletion as folder deletion
+                        if (oldFile.endsWith("/.gitkeep")) {
+                            deleted++;
+                        } else {
                             deleted++;
                         }
                         pushPrefs.edit().remove(oldFile).apply();
@@ -1463,6 +1490,7 @@ public class IDEActivity extends AppCompatActivity {
                         String result = api.commitAndPush(gitkeepPath, "", message);
                         if (result.contains("Success")) {
                             pushPrefs.edit().putLong(gitkeepPath, System.currentTimeMillis()).apply();
+                            success++; // Count folder creation
                         }
                     }
                 } else {
