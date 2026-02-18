@@ -339,21 +339,22 @@ public class ProjectsActivity extends AppCompatActivity {
                 String[] parts = profile.split("\\|");
                 if (parts.length != 3) continue;
                 
-                String name = parts[0];
+                String username = parts[0];
                 LinearLayout row = new LinearLayout(this);
                 row.setOrientation(LinearLayout.HORIZONTAL);
                 
                 Button btn = new Button(this);
-                btn.setText((name.equals(activeProfile) ? "✓ " : "") + name);
+                btn.setText((username.equals(activeProfile) ? "✓ " : "") + username);
                 btn.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
                 btn.setOnClickListener(v -> {
-                    profilePrefs.edit().putString("activeProfile", name).apply();
+                    profilePrefs.edit().putString("activeProfile", username).apply();
                     SharedPreferences creds = getSharedPreferences("GitHubCreds", MODE_PRIVATE);
                     creds.edit()
-                        .putString("username", parts[1])
-                        .putString("token", parts[2])
+                        .putString("username", parts[0])
+                        .putString("token", parts[1])
+                        .putString("repo", parts[2])
                         .apply();
-                    Toast.makeText(this, "Active: " + name, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Active: " + username, Toast.LENGTH_SHORT).show();
                     showProfiles();
                 });
                 row.addView(btn);
@@ -363,7 +364,7 @@ public class ProjectsActivity extends AppCompatActivity {
                 btnDel.setOnClickListener(v -> {
                     String newProfiles = profiles.replace(profile + ";", "");
                     profilePrefs.edit().putString("profiles", newProfiles).apply();
-                    if (name.equals(activeProfile)) {
+                    if (username.equals(activeProfile)) {
                         profilePrefs.edit().remove("activeProfile").apply();
                     }
                     showProfiles();
@@ -394,10 +395,6 @@ public class ProjectsActivity extends AppCompatActivity {
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(50, 20, 50, 20);
         
-        EditText etName = new EditText(this);
-        etName.setHint("Profile Name");
-        layout.addView(etName);
-        
         EditText etUser = new EditText(this);
         etUser.setHint("Username");
         layout.addView(etUser);
@@ -413,19 +410,18 @@ public class ProjectsActivity extends AppCompatActivity {
         
         builder.setView(layout);
         builder.setPositiveButton("Add", (d, w) -> {
-            String name = etName.getText().toString().trim();
             String user = etUser.getText().toString().trim();
             String token = etToken.getText().toString().trim();
             String repo = etRepo.getText().toString().trim();
             
-            if (name.isEmpty() || user.isEmpty() || token.isEmpty() || repo.isEmpty()) {
+            if (user.isEmpty() || token.isEmpty() || repo.isEmpty()) {
                 Toast.makeText(this, "Fill all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
             
             SharedPreferences profilePrefs = getSharedPreferences("GitHubProfiles", MODE_PRIVATE);
             String profiles = profilePrefs.getString("profiles", "");
-            profiles += name + "|" + user + "|" + token + "|" + repo + ";";
+            profiles += user + "|" + token + "|" + repo + ";";
             profilePrefs.edit().putString("profiles", profiles).apply();
             
             Toast.makeText(this, "Profile added", Toast.LENGTH_SHORT).show();
