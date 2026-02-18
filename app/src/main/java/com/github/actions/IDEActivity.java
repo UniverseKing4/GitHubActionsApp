@@ -1401,6 +1401,9 @@ public class IDEActivity extends AppCompatActivity {
             java.util.Set<String> previousFiles = pushPrefs.getStringSet("pushedFiles", new java.util.HashSet<>());
             int deleted = 0;
             for (String oldFile : previousFiles) {
+                // Skip folder markers (they're just for tracking)
+                if (oldFile.endsWith("/")) continue;
+                
                 if (!currentFiles.contains(oldFile)) {
                     String result = api.deleteFile(oldFile, message);
                     if (result.contains("Success")) {
@@ -1408,7 +1411,6 @@ public class IDEActivity extends AppCompatActivity {
                         if (!oldFile.endsWith("/.gitkeep")) {
                             deleted++;
                         }
-                        results.add(oldFile + ": Deleted");
                         pushPrefs.edit().remove(oldFile).apply();
                     }
                 }
@@ -1446,27 +1448,28 @@ public class IDEActivity extends AppCompatActivity {
         }
         
         for (File file : files) {
+            String filePath = relativePath.isEmpty() ? file.getName() : relativePath + "/" + file.getName();
+            
             if (file.isDirectory()) {
-                String newPath = relativePath.isEmpty() ? file.getName() : relativePath + "/" + file.getName();
+                // Mark as folder with trailing slash
+                currentFiles.add(filePath + "/");
                 
                 File[] subFiles = file.listFiles();
                 if (subFiles == null || subFiles.length == 0) {
-                    String gitkeepPath = newPath + "/.gitkeep";
+                    String gitkeepPath = filePath + "/.gitkeep";
                     currentFiles.add(gitkeepPath);
                     long gitkeepTime = pushPrefs.getLong(gitkeepPath, 0);
                     if (gitkeepTime == 0) {
                         String result = api.commitAndPush(gitkeepPath, "", message);
                         if (result.contains("Success")) {
                             pushPrefs.edit().putLong(gitkeepPath, System.currentTimeMillis()).apply();
-                            // Don't count .gitkeep in success count
                         }
                     }
                 } else {
-                    success += pushModifiedFiles(api, file, newPath, message, results, pushPrefs, currentFiles);
+                    success += pushModifiedFiles(api, file, filePath, message, results, pushPrefs, currentFiles);
                 }
             } else {
                 long fileModified = file.lastModified();
-                String filePath = relativePath.isEmpty() ? file.getName() : relativePath + "/" + file.getName();
                 currentFiles.add(filePath);
                 
                 long lastPushed = pushPrefs.getLong(filePath, 0);
