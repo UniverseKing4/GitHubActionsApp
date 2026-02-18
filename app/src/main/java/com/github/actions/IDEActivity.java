@@ -140,9 +140,6 @@ public class IDEActivity extends AppCompatActivity {
         editor.setHighlightColor(0x6633B5E5);
         editor.setVerticalScrollBarEnabled(false);
         
-        editorScroll.addView(editor);
-        editorContainer.addView(editorScroll);
-        
         // Tab key support and keyboard shortcuts
         editor.setOnKeyListener((v, keyCode, event) -> {
             if (event.getAction() == android.view.KeyEvent.ACTION_DOWN) {
