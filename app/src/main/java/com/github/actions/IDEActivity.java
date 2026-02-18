@@ -48,6 +48,10 @@ public class IDEActivity extends AppCompatActivity {
         projectPath = getIntent().getStringExtra("projectPath");
         prefs = getSharedPreferences("GitHubCreds", MODE_PRIVATE);
         
+        // Apply dark mode
+        SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
+        boolean isDark = themePrefs.getBoolean("darkMode", false);
+        
         // Verify project path exists
         File projectDir = new File(projectPath);
         if (!projectDir.exists()) {
@@ -57,6 +61,9 @@ public class IDEActivity extends AppCompatActivity {
         }
         
         drawerLayout = new DrawerLayout(this);
+        if (isDark) {
+            drawerLayout.setBackgroundColor(0xFF1E1E1E);
+        }
         
         // Main editor area
         LinearLayout mainLayout = new LinearLayout(this);
@@ -64,6 +71,9 @@ public class IDEActivity extends AppCompatActivity {
         mainLayout.setLayoutParams(new DrawerLayout.LayoutParams(
             DrawerLayout.LayoutParams.MATCH_PARENT,
             DrawerLayout.LayoutParams.MATCH_PARENT));
+        if (isDark) {
+            mainLayout.setBackgroundColor(0xFF1E1E1E);
+        }
         
         // Editor container
         LinearLayout editorContainer = new LinearLayout(this);
@@ -71,6 +81,9 @@ public class IDEActivity extends AppCompatActivity {
         editorContainer.setLayoutParams(new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.MATCH_PARENT));
+        if (isDark) {
+            editorContainer.setBackgroundColor(0xFF1E1E1E);
+        }
         
         // Line numbers
         ScrollView lineNumberScroll = new ScrollView(this);
@@ -85,8 +98,8 @@ public class IDEActivity extends AppCompatActivity {
         lineNumbers.setTextSize(14);
         lineNumbers.setGravity(Gravity.TOP | Gravity.END);
         lineNumbers.setPadding(5, 20, 8, 20);
-        lineNumbers.setBackgroundColor(0xFFF5F5F5);
-        lineNumbers.setTextColor(0xFF999999);
+        lineNumbers.setBackgroundColor(isDark ? 0xFF2D2D2D : 0xFFF5F5F5);
+        lineNumbers.setTextColor(isDark ? 0xFF666666 : 0xFF999999);
         lineNumbers.setLineSpacing(0, 1.0f);
         lineNumbers.setMinHeight(0);
         lineNumbers.setLayoutParams(new LinearLayout.LayoutParams(
@@ -115,8 +128,8 @@ public class IDEActivity extends AppCompatActivity {
         editor.setGravity(Gravity.TOP | Gravity.START);
         editor.setPadding(10, 20, 15, 20);
         editor.setHorizontallyScrolling(false); // Enable word wrap
-        editor.setBackgroundColor(0xFFFFFFFF);
-        editor.setTextColor(0xFF000000);
+        editor.setBackgroundColor(isDark ? 0xFF1E1E1E : 0xFFFFFFFF);
+        editor.setTextColor(isDark ? 0xFFE0E0E0 : 0xFF000000);
         editor.setHighlightColor(0x6633B5E5);
         editor.setVerticalScrollBarEnabled(false);
         
@@ -328,7 +341,7 @@ public class IDEActivity extends AppCompatActivity {
         // File drawer
         LinearLayout drawer = new LinearLayout(this);
         drawer.setOrientation(LinearLayout.VERTICAL);
-        drawer.setBackgroundColor(0xFFF5F5F5);
+        drawer.setBackgroundColor(isDark ? 0xFF2D2D2D : 0xFFF5F5F5);
         drawer.setLayoutParams(new DrawerLayout.LayoutParams(
             (int)(300 * getResources().getDisplayMetrics().density),
             DrawerLayout.LayoutParams.MATCH_PARENT,
@@ -338,6 +351,9 @@ public class IDEActivity extends AppCompatActivity {
         drawerTitle.setText("Files");
         drawerTitle.setTextSize(20);
         drawerTitle.setPadding(20, 40, 20, 10);
+        if (isDark) {
+            drawerTitle.setTextColor(0xFFFFFFFF);
+        }
         drawer.addView(drawerTitle);
         
         LinearLayout btnContainer = new LinearLayout(this);

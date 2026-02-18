@@ -22,6 +22,10 @@ public class ProjectsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        // Apply dark mode
+        SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
+        boolean isDark = themePrefs.getBoolean("darkMode", false);
+        
         // Hide action bar
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
@@ -32,6 +36,9 @@ public class ProjectsActivity extends AppCompatActivity {
         LinearLayout mainLayout = new LinearLayout(this);
         mainLayout.setOrientation(LinearLayout.VERTICAL);
         mainLayout.setPadding(20, 20, 20, 20);
+        if (isDark) {
+            mainLayout.setBackgroundColor(0xFF1E1E1E);
+        }
         
         TextView title = new TextView(this);
         title.setText("GitCode");
@@ -50,10 +57,22 @@ public class ProjectsActivity extends AppCompatActivity {
         btnSettings.setOnClickListener(v -> showSettings());
         mainLayout.addView(btnSettings);
         
+        Button btnDarkMode = new Button(this);
+        btnDarkMode.setText(isDark ? "☀ Light Mode" : "🌙 Dark Mode");
+        btnDarkMode.setOnClickListener(v -> {
+            boolean currentDark = themePrefs.getBoolean("darkMode", false);
+            themePrefs.edit().putBoolean("darkMode", !currentDark).apply();
+            recreate();
+        });
+        mainLayout.addView(btnDarkMode);
+        
         TextView projectsTitle = new TextView(this);
         projectsTitle.setText("Recent Projects");
         projectsTitle.setTextSize(20);
         projectsTitle.setPadding(0, 40, 0, 20);
+        if (isDark) {
+            projectsTitle.setTextColor(0xFFFFFFFF);
+        }
         mainLayout.addView(projectsTitle);
         
         projectsList = new LinearLayout(this);
