@@ -255,29 +255,6 @@ Contributions are welcome! Please:
 - Binary files are not supported for editing
 - GitHub API rate limits apply (60 requests/hour unauthenticated, 5000/hour authenticated)
 
-## 📝 Changelog
-
-### v2.0 (Latest)
-- ✨ Multi-language syntax highlighting
-- ✨ Tabbed interface for multiple files
-- ✨ Bracket matching
-- ✨ Project statistics
-- ✨ Customizable font size
-- ✨ Clone repository feature
-- ✨ Pull from GitHub
-- ✨ Dark mode as default theme
-- 🐛 Fixed line number alignment
-- 🐛 Fixed toolbar layout
-- 🐛 Fixed settings dialog
-- 🎨 Improved launcher icon
-
-### v1.0
-- Initial release
-- Basic code editor
-- GitHub push functionality
-- Project management
-- Dark/Light themes
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

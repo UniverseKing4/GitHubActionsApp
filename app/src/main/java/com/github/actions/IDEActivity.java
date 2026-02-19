@@ -266,9 +266,9 @@ public class IDEActivity extends AppCompatActivity {
                 
                 // Track for undo/redo with time-based grouping
                 if (!isUndoRedo && !text.equals(before)) {
-                    long currentTime = System.currentTimeMillis();
+                    long undoTime = System.currentTimeMillis();
                     // Only save to undo stack if enough time has passed or significant change
-                    if (currentTime - lastEditTime > UNDO_DELAY) {
+                    if (undoTime - lastEditTime > UNDO_DELAY) {
                         if (!undoStack.isEmpty() && !undoStack.peek().equals(before)) {
                             undoStack.push(before);
                         } else if (undoStack.isEmpty()) {
@@ -277,7 +277,7 @@ public class IDEActivity extends AppCompatActivity {
                         if (undoStack.size() > 50) undoStack.remove(0);
                         redoStack.clear();
                     }
-                    lastEditTime = currentTime;
+                    lastEditTime = undoTime;
                 }
                 
                 int selection = editor.getSelectionStart();
