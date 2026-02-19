@@ -118,12 +118,12 @@ public class IDEActivity extends AppCompatActivity {
             LinearLayout.LayoutParams.MATCH_PARENT);
         lineNumberScroll.setLayoutParams(lineNumParams);
         
-        lineNumbers = new TextView(this);
-        lineNumbers.setTypeface(android.graphics.Typeface.MONOSPACE);
-        
         // Load saved font size
         SharedPreferences settingsPrefs = getSharedPreferences("GitCodeSettings", MODE_PRIVATE);
         int fontSize = settingsPrefs.getInt("fontSize", 14);
+        
+        lineNumbers = new TextView(this);
+        lineNumbers.setTypeface(android.graphics.Typeface.MONOSPACE);
         lineNumbers.setTextSize(fontSize);
         
         lineNumbers.setGravity(Gravity.TOP | Gravity.END);
@@ -152,10 +152,6 @@ public class IDEActivity extends AppCompatActivity {
             LinearLayout.LayoutParams.WRAP_CONTENT));
         editor.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
         editor.setTypeface(android.graphics.Typeface.MONOSPACE);
-        
-        // Load saved font size
-        SharedPreferences settingsPrefs = getSharedPreferences("GitCodeSettings", MODE_PRIVATE);
-        int fontSize = settingsPrefs.getInt("fontSize", 14);
         editor.setTextSize(fontSize);
         
         editor.setLineSpacing(0, 1.0f);
