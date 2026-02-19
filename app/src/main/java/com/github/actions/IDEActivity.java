@@ -212,7 +212,15 @@ public class IDEActivity extends AppCompatActivity {
             if (currentFile != null) {
                 String currentText = editor.getText().toString();
                 if (!currentText.equals(lastHighlightedText)) {
-                    applySyntaxHighlighting(currentFile.getName(), currentText);
+                    // For large files, only highlight the chunk content (skip buttons)
+                    if (isLargeFile) {
+                        String textToHighlight = currentText;
+                        textToHighlight = textToHighlight.replaceFirst("^▲▲▲ TAP TO LOAD PREVIOUS \\(\\d+/\\d+\\) ▲▲▲\\n\\n", "");
+                        textToHighlight = textToHighlight.replaceFirst("\\n\\n▼▼▼ TAP TO LOAD NEXT \\(\\d+/\\d+\\) ▼▼▼$", "");
+                        applySyntaxHighlighting(currentFile.getName(), textToHighlight);
+                    } else {
+                        applySyntaxHighlighting(currentFile.getName(), currentText);
+                    }
                     lastHighlightedText = currentText;
                 }
             }
@@ -881,35 +889,107 @@ public class IDEActivity extends AppCompatActivity {
 
     private void showGoToLineDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Go to Line");
-        EditText input = new EditText(this);
-        input.setHint("Line number");
-        input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        input.setPadding(50, 20, 50, 20);
-        builder.setView(input);
-        builder.setPositiveButton("Go", (d, w) -> {
-            try {
-                int line = Integer.parseInt(input.getText().toString());
-                String text = editor.getText().toString();
-                String[] lines = text.split("\n", -1);
+        
+        if (isLargeFile) {
+            builder.setTitle("Go to Line or Part");
+            android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
+            layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+            layout.setPadding(50, 20, 50, 20);
+            
+            EditText lineInput = new EditText(this);
+            lineInput.setHint("Line number (optional)");
+            lineInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+            layout.addView(lineInput);
+            
+            EditText partInput = new EditText(this);
+            partInput.setHint("Part number (optional)");
+            partInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+            partInput.setPadding(0, 20, 0, 0);
+            layout.addView(partInput);
+            
+            builder.setView(layout);
+            builder.setPositiveButton("Go", (d, w) -> {
+                String lineStr = lineInput.getText().toString().trim();
+                String partStr = partInput.getText().toString().trim();
                 
-                if (line > 0 && line <= lines.length) {
-                    int pos = 0;
-                    for (int i = 0; i < line - 1; i++) {
-                        pos += lines[i].length() + 1;
+                if (!lineStr.isEmpty()) {
+                    // Go to line
+                    try {
+                        int line = Integer.parseInt(lineStr);
+                        String[] allLines = fullFileContent.split("\n", -1);
+                        
+                        if (line > 0 && line <= allLines.length) {
+                            // Calculate which chunk contains this line
+                            int charPos = 0;
+                            for (int i = 0; i < line - 1; i++) {
+                                charPos += allLines[i].length() + 1;
+                            }
+                            
+                            // Load the chunk containing this line
+                            updateFullContentFromChunk();
+                            loadChunkWithButtons(charPos);
+                            
+                            Toast.makeText(this, "Line " + line, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(this, "Invalid line number", Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Invalid line number", Toast.LENGTH_SHORT).show();
                     }
-                    editor.setSelection(pos);
-                    editor.requestFocus();
-                    Toast.makeText(this, "Line " + line, Toast.LENGTH_SHORT).show();
+                } else if (!partStr.isEmpty()) {
+                    // Go to part
+                    try {
+                        int part = Integer.parseInt(partStr);
+                        int totalParts = (fullFileContent.length() + CHUNK_SIZE - 1) / CHUNK_SIZE;
+                        
+                        if (part > 0 && part <= totalParts) {
+                            updateFullContentFromChunk();
+                            loadChunkWithButtons((part - 1) * CHUNK_SIZE);
+                            Toast.makeText(this, "Part " + part + "/" + totalParts, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(this, "Invalid part number", Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Invalid part number", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
-                    Toast.makeText(this, "Invalid line number", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Enter line or part number", Toast.LENGTH_SHORT).show();
                 }
-            } catch (Exception e) {
-                Toast.makeText(this, "Invalid input", Toast.LENGTH_SHORT).show();
-            }
-        });
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
+            });
+            builder.setNegativeButton("Cancel", null);
+            builder.show();
+        } else {
+            // Normal go to line for small files
+            builder.setTitle("Go to Line");
+            EditText input = new EditText(this);
+            input.setHint("Line number");
+            input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+            input.setPadding(50, 20, 50, 20);
+            builder.setView(input);
+            builder.setPositiveButton("Go", (d, w) -> {
+                try {
+                    int line = Integer.parseInt(input.getText().toString());
+                    String text = editor.getText().toString();
+                    String[] lines = text.split("\n", -1);
+                    
+                    if (line > 0 && line <= lines.length) {
+                        int pos = 0;
+                        for (int i = 0; i < line - 1; i++) {
+                            pos += lines[i].length() + 1;
+                        }
+                        editor.setSelection(pos);
+                        editor.requestFocus();
+                        Toast.makeText(this, "Line " + line, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Invalid line number", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(this, "Invalid input", Toast.LENGTH_SHORT).show();
+                }
+            });
+            builder.setNegativeButton("Cancel", null);
+            builder.show();
+        }
     }
 
     private void loadFiles() {
@@ -1493,11 +1573,6 @@ public class IDEActivity extends AppCompatActivity {
         editor.setText(displayText.toString());
         editor.setEnabled(true);
         editor.clearFocus(); // Don't focus editor
-        
-        // Apply syntax highlighting for large files
-        if (currentFile != null) {
-            applySyntaxHighlighting(currentFile.getName(), chunk);
-        }
         
         // Update line numbers for current chunk
         updateLineNumbersForChunk(chunk, currentChunkStart);
