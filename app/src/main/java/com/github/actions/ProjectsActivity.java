@@ -336,15 +336,6 @@ public class ProjectsActivity extends AppCompatActivity {
                 Button btn = new Button(this);
                 btn.setText((username.equals(activeProfile) ? "✓ " : "") + username);
                 btn.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-                btn.setOnClickListener(v -> {
-                    profilePrefs.edit().putString("activeProfile", username).apply();
-                    SharedPreferences creds = getSharedPreferences("GitHubCreds", MODE_PRIVATE);
-                    creds.edit()
-                        .putString("username", parts[0])
-                        .putString("token", parts[1])
-                        .apply();
-                    Toast.makeText(this, "Active: " + username, Toast.LENGTH_SHORT).show();
-                });
                 row.addView(btn);
                 
                 Button btnDel = new Button(this);
@@ -372,6 +363,38 @@ public class ProjectsActivity extends AppCompatActivity {
         builder.setView(scroll);
         builder.setNegativeButton("Close", null);
         AlertDialog dialog = builder.create();
+        
+        // Set click listeners after dialog is created
+        for (String profile : profiles.split(";")) {
+            if (profile.isEmpty()) continue;
+            String[] parts = profile.split("\\|");
+            if (parts.length != 2) continue;
+            String username = parts[0];
+            
+            for (int i = 0; i < layout.getChildCount(); i++) {
+                android.view.View child = layout.getChildAt(i);
+                if (child instanceof LinearLayout) {
+                    LinearLayout row = (LinearLayout) child;
+                    if (row.getChildCount() > 0 && row.getChildAt(0) instanceof Button) {
+                        Button btn = (Button) row.getChildAt(0);
+                        String btnText = btn.getText().toString().replace("✓ ", "");
+                        if (btnText.equals(username)) {
+                            btn.setOnClickListener(v -> {
+                                profilePrefs.edit().putString("activeProfile", username).apply();
+                                SharedPreferences creds = getSharedPreferences("GitHubCreds", MODE_PRIVATE);
+                                creds.edit()
+                                    .putString("username", parts[0])
+                                    .putString("token", parts[1])
+                                    .apply();
+                                Toast.makeText(this, "Active: " + username, Toast.LENGTH_SHORT).show();
+                                dialog.dismiss();
+                                showProfiles();
+                            });
+                        }
+                    }
+                }
+            }
+        }
         
         btnAdd.setOnClickListener(v -> {
             dialog.dismiss();

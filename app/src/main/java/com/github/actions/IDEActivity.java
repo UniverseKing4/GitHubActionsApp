@@ -451,7 +451,7 @@ public class IDEActivity extends AppCompatActivity {
             titleView.setText(projectName);
             titleView.setTextColor(isDark ? 0xFFFFFFFF : 0xFF000000);
             titleView.setTextSize(14);
-            titleView.setPadding(0, 0, 15, 0);
+            titleView.setPadding(0, 0, 25, 0);
             titleView.setGravity(Gravity.CENTER_VERTICAL);
             titleView.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
