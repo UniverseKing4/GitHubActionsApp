@@ -234,31 +234,27 @@ public class IDEActivity extends AppCompatActivity {
             
             public void afterTextChanged(android.text.Editable s) {
                 if (isProcessing) return;
+                
+                // Skip ALL processing for large files
+                if (isLargeFile) {
+                    isProcessing = false;
+                    return;
+                }
+                
                 isProcessing = true;
                 
                 String text = s.toString();
                 long currentTime = System.currentTimeMillis();
                 
-                // Skip heavy operations for large files
-                boolean isLargeFile = text.length() > 50000;
-                
-                if (!isLargeFile) {
-                    // Update line numbers only every 100ms to reduce lag
-                    if (currentTime - lastUpdateTime > 100) {
-                        updateLineNumbers(lineNumbers, text);
-                        lastUpdateTime = currentTime;
-                    }
-                    
-                    // Trigger syntax highlighting after 2 seconds of inactivity
-                    syntaxHandler.removeCallbacks(syntaxRunnable);
-                    syntaxHandler.postDelayed(syntaxRunnable, 2000);
-                } else {
-                    // For large files, update line numbers only every 500ms
-                    if (currentTime - lastUpdateTime > 500) {
-                        lineNumbers.post(() -> updateLineNumbers(lineNumbers, text));
-                        lastUpdateTime = currentTime;
-                    }
+                // Update line numbers only every 100ms to reduce lag
+                if (currentTime - lastUpdateTime > 100) {
+                    updateLineNumbers(lineNumbers, text);
+                    lastUpdateTime = currentTime;
                 }
+                
+                // Trigger syntax highlighting after 2 seconds of inactivity
+                syntaxHandler.removeCallbacks(syntaxRunnable);
+                syntaxHandler.postDelayed(syntaxRunnable, 2000);
                 
                 // Always trigger auto-save
                 autoSaveHandler.removeCallbacks(autoSaveRunnable);
@@ -1445,14 +1441,42 @@ public class IDEActivity extends AppCompatActivity {
                             undoStack.clear();
                             redoStack.clear();
                             
-                            // Disable text watcher temporarily
+                            // Disable ALL text watchers for large files
+                            editor.removeTextChangedListener(null);
+                            
+                            // Set text without triggering watchers
                             editor.setText(content);
                             editor.setEnabled(true);
                             
-                            // Update line numbers once
-                            updateLineNumbers(lineNumbers, content);
+                            // Disable undo/redo for large files
+                            editor.setInputType(android.text.InputType.TYPE_CLASS_TEXT | 
+                                              android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE | 
+                                              android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                             
-                            Toast.makeText(this, "Large file - real-time syntax highlighting disabled for performance", Toast.LENGTH_LONG).show();
+                            // Update line numbers once in background
+                            executor.execute(() -> {
+                                String[] lines = content.split("\n", -1);
+                                int lineCount = lines.length;
+                                StringBuilder sb = new StringBuilder();
+                                for (int i = 1; i <= lineCount; i++) {
+                                    sb.append(i);
+                                    if (i < lineCount) sb.append("\n");
+                                }
+                                String lineNumberText = sb.toString();
+                                
+                                runOnUiThread(() -> {
+                                    lineNumbers.setText(lineNumberText);
+                                    lineNumbers.post(() -> {
+                                        lineNumbers.measure(0, 0);
+                                        int measuredWidth = lineNumbers.getMeasuredWidth();
+                                        int perfectWidth = measuredWidth + (int)(4 * getResources().getDisplayMetrics().density);
+                                        lineNumberScroll.getLayoutParams().width = perfectWidth;
+                                        lineNumberScroll.requestLayout();
+                                    });
+                                });
+                            });
+                            
+                            Toast.makeText(this, "Large file mode - some features disabled for performance", Toast.LENGTH_LONG).show();
                             
                             saveFileState(file);
                             updateTabsAndUI(file);
