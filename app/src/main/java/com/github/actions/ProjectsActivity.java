@@ -202,14 +202,18 @@ public class ProjectsActivity extends AppCompatActivity {
             Button btnEdit = new Button(this);
             btnEdit.setText("✏️");
             btnEdit.setTextSize(14);
-            btnEdit.setPadding(10, 0, 10, 0);
+            btnEdit.setMinWidth(0);
+            btnEdit.setMinimumWidth(0);
+            btnEdit.setPadding(20, 0, 20, 0);
             btnEdit.setOnClickListener(v -> editProject(actualName, path));
             projectItem.addView(btnEdit);
             
             Button btnDelete = new Button(this);
             btnDelete.setText("🗑");
             btnDelete.setTextSize(14);
-            btnDelete.setPadding(10, 0, 10, 0);
+            btnDelete.setMinWidth(0);
+            btnDelete.setMinimumWidth(0);
+            btnDelete.setPadding(20, 0, 20, 0);
             btnDelete.setOnClickListener(v -> deleteProject(actualName, path));
             projectItem.addView(btnDelete);
             
@@ -562,12 +566,16 @@ public class ProjectsActivity extends AppCompatActivity {
         SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
         boolean isDark = themePrefs.getBoolean("darkMode", false);
         btnDarkMode.setText(isDark ? "☀ Switch to Light Mode" : "🌙 Switch to Dark Mode");
+        layout.addView(btnDarkMode);
+        
+        AlertDialog dialog = builder.create();
+        
         btnDarkMode.setOnClickListener(v -> {
             boolean currentDark = themePrefs.getBoolean("darkMode", false);
             themePrefs.edit().putBoolean("darkMode", !currentDark).apply();
+            dialog.dismiss();
             recreate();
         });
-        layout.addView(btnDarkMode);
         
         builder.setView(layout);
         builder.setPositiveButton("Save", (d, w) -> {
@@ -576,6 +584,6 @@ public class ProjectsActivity extends AppCompatActivity {
             Toast.makeText(this, "Settings saved", Toast.LENGTH_SHORT).show();
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        dialog.show();
     }
 }

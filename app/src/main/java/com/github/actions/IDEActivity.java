@@ -127,7 +127,7 @@ public class IDEActivity extends AppCompatActivity {
         lineNumbers.setTextSize(fontSize);
         
         lineNumbers.setGravity(Gravity.TOP | Gravity.END);
-        lineNumbers.setPadding(8, 20, 4, 20);
+        lineNumbers.setPadding(8, 20, 2, 20);
         lineNumbers.setBackgroundColor(isDark ? 0xFF2D2D2D : 0xFFF5F5F5);
         lineNumbers.setTextColor(isDark ? 0xFF666666 : 0xFF999999);
         lineNumbers.setLineSpacing(0, 1.0f);
