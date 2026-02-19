@@ -191,6 +191,7 @@ public class ProjectsActivity extends AppCompatActivity {
         
         String[] projectArray = projects.split(";");
         StringBuilder validProjects = new StringBuilder();
+        File gitCodeDir = new File(Environment.getExternalStorageDirectory(), "GitCode");
         
         for (String project : projectArray) {
             if (project.isEmpty()) continue;
@@ -202,17 +203,15 @@ public class ProjectsActivity extends AppCompatActivity {
             
             File dir = new File(path);
             
-            // If path doesn't exist, try to find renamed folder in parent directory
+            // If path doesn't exist, search in GitCode directory for folder with matching name
             if (!dir.exists()) {
-                File parentDir = dir.getParentFile();
-                if (parentDir != null && parentDir.exists()) {
-                    // Look for a folder with the same name in parent directory
-                    File[] siblings = parentDir.listFiles();
-                    if (siblings != null) {
-                        for (File sibling : siblings) {
-                            if (sibling.isDirectory() && sibling.getName().equals(name)) {
-                                dir = sibling;
-                                path = sibling.getAbsolutePath();
+                if (gitCodeDir.exists()) {
+                    File[] allProjects = gitCodeDir.listFiles();
+                    if (allProjects != null) {
+                        for (File projectDir : allProjects) {
+                            if (projectDir.isDirectory() && projectDir.getName().equals(name)) {
+                                dir = projectDir;
+                                path = projectDir.getAbsolutePath();
                                 break;
                             }
                         }
@@ -222,7 +221,7 @@ public class ProjectsActivity extends AppCompatActivity {
                 if (!dir.exists()) continue;
             }
             
-            // Get actual folder name from path
+            // Get actual folder name and path
             String actualName = dir.getName();
             String actualPath = dir.getAbsolutePath();
             
@@ -274,12 +273,20 @@ public class ProjectsActivity extends AppCompatActivity {
             String newName = input.getText().toString().trim();
             if (newName.isEmpty() || newName.equals(oldName)) return;
             
+            // Check if project with new name already exists
+            File gitCodeDir = new File(Environment.getExternalStorageDirectory(), "GitCode");
+            File newDir = new File(gitCodeDir, newName);
+            if (newDir.exists() && !newDir.getAbsolutePath().equals(path)) {
+                Toast.makeText(this, "Another project has same name", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
             // Rename the actual folder
             File oldDir = new File(path);
-            File newDir = new File(oldDir.getParent(), newName);
+            File targetDir = new File(oldDir.getParent(), newName);
             
-            if (oldDir.renameTo(newDir)) {
-                String newPath = newDir.getAbsolutePath();
+            if (oldDir.renameTo(targetDir)) {
+                String newPath = targetDir.getAbsolutePath();
                 String projects = prefs.getString("projects", "");
                 projects = projects.replace(oldName + "|" + path, newName + "|" + newPath);
                 prefs.edit().putString("projects", projects).apply();
