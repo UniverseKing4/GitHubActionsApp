@@ -42,6 +42,7 @@ public class IDEActivity extends AppCompatActivity {
     private long lastEditTime = 0;
     private static final long UNDO_DELAY = 1000; // 1 second
     private boolean wordWrapEnabled = true;
+    private android.text.style.BackgroundColorSpan bracketHighlight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -1215,6 +1216,9 @@ public class IDEActivity extends AppCompatActivity {
             return;
         }
         
+        SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
+        boolean isDark = themePrefs.getBoolean("darkMode", false);
+        
         String ext = "";
         int i = fileName.lastIndexOf('.');
         if (i > 0) {
@@ -1225,9 +1229,11 @@ public class IDEActivity extends AppCompatActivity {
             android.text.SpannableString spannable = new android.text.SpannableString(content);
             
             String[] keywords = getKeywordsForExtension(ext);
-            int keywordColor = 0xFF0000FF;
-            int stringColor = 0xFF008000;
-            int commentColor = 0xFF808080;
+            int keywordColor = isDark ? 0xFFFF79C6 : 0xFF0000FF;  // Pink/Blue
+            int stringColor = isDark ? 0xFF50FA7B : 0xFF008000;   // Green
+            int commentColor = isDark ? 0xFF6272A4 : 0xFF808080;  // Gray
+            int numberColor = isDark ? 0xFFBD93F9 : 0xFFFF6600;   // Purple/Orange
+            int functionColor = isDark ? 0xFF8BE9FD : 0xFF0080FF; // Cyan/Blue
             
             // Highlight keywords
             for (String keyword : keywords) {
@@ -1243,13 +1249,21 @@ public class IDEActivity extends AppCompatActivity {
                 }
             }
             
-            // Highlight strings
+            // Highlight numbers
+            highlightPattern(spannable, content, "\\b\\d+\\.?\\d*\\b", numberColor);
+            
+            // Highlight function calls
+            highlightPattern(spannable, content, "\\b\\w+(?=\\()", functionColor);
+            
+            // Highlight strings (must be after keywords to override)
             highlightPattern(spannable, content, "\"[^\"]*\"", stringColor);
             highlightPattern(spannable, content, "'[^']*'", stringColor);
+            highlightPattern(spannable, content, "`[^`]*`", stringColor);
             
-            // Highlight comments
+            // Highlight comments (must be last to override everything)
             highlightPattern(spannable, content, "//.*", commentColor);
             highlightPattern(spannable, content, "#.*", commentColor);
+            highlightPattern(spannable, content, "/\\*.*?\\*/", commentColor);
             
             editor.setText(spannable);
         } catch (Exception e) {
