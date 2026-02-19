@@ -1,13 +1,25 @@
-# GitHub Actions Android App
+# GitCode - Mobile IDE for Android
 
-A feature-rich Android app for committing and pushing files to GitHub using Personal Access Token.
+A fully-featured mobile IDE for Android with GitHub integration, syntax highlighting, and professional code editing features.
 
-## Features
-- 📁 **File Picker** - Select any file from your device to upload
-- 💾 **Save Credentials** - Securely save GitHub credentials locally
-- ✏️ **Manual Entry** - Type content directly or paste text
-- 🚀 **Auto Release** - GitHub Actions automatically builds and releases APK
-- 🔒 **Secure** - Token stored locally, never exposed
+## Latest Features (v2.0)
+- 🎨 **Syntax Highlighting** - Multi-language support with dark mode colors
+- 📑 **Tabs** - Open multiple files simultaneously
+- 🔗 **Bracket Matching** - Highlight matching brackets
+- 📊 **Project Statistics** - View file count, lines of code, etc.
+- ⚙️ **Font Size Settings** - Adjustable editor font size
+- 📥 **Clone Repos** - Clone from GitHub URL
+- ⬇️ **Pull Changes** - Sync with GitHub repository
+- 🚀 **Smart Push** - Only push modified files
+
+## Core Features
+- 📁 **Project Management** - Create, edit, delete projects
+- 💾 **File Operations** - Create, rename, delete, move files and folders
+- ✏️ **Code Editor** - Line numbers, auto-indent, auto-brackets, undo/redo
+- 🔍 **Find & Replace** - Search and replace in files
+- 🌙 **Dark Mode** - Full dark theme support
+- 👤 **Multiple Profiles** - Switch between GitHub accounts
+- 🔒 **Secure** - Credentials stored locally
 
 ## New Features
 - Select files from device storage
