@@ -239,9 +239,13 @@ public class IDEActivity extends AppCompatActivity {
                 String text = s.toString();
                 long currentTime = System.currentTimeMillis();
                 
-                // Skip heavy operations for large files
+                // For large files, only do syntax highlighting
                 if (isLargeFile) {
-                    // Only auto-save for large files
+                    // Trigger syntax highlighting after 2 seconds
+                    syntaxHandler.removeCallbacks(syntaxRunnable);
+                    syntaxHandler.postDelayed(syntaxRunnable, 2000);
+                    
+                    // Auto-save
                     autoSaveHandler.removeCallbacks(autoSaveRunnable);
                     autoSaveHandler.postDelayed(autoSaveRunnable, 2000);
                     isProcessing = false;
@@ -1488,6 +1492,12 @@ public class IDEActivity extends AppCompatActivity {
         
         editor.setText(displayText.toString());
         editor.setEnabled(true);
+        editor.clearFocus(); // Don't focus editor
+        
+        // Apply syntax highlighting for large files
+        if (currentFile != null) {
+            applySyntaxHighlighting(currentFile.getName(), chunk);
+        }
         
         // Update line numbers for current chunk
         updateLineNumbersForChunk(chunk, currentChunkStart);
@@ -1562,10 +1572,6 @@ public class IDEActivity extends AppCompatActivity {
             }
         });
     }
-    
-    private void updateLineNumbersForLargeFile() {
-        executor.execute(() -> {
-            String[] lines = fullFileContent.split("\n", -1);
     
     private void updateFullContentFromChunk() {
         if (!isLargeFile || fullFileContent.isEmpty()) return;
