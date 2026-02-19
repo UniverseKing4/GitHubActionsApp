@@ -451,11 +451,12 @@ public class IDEActivity extends AppCompatActivity {
             titleView.setText(projectName);
             titleView.setTextColor(isDark ? 0xFFFFFFFF : 0xFF000000);
             titleView.setTextSize(14);
-            titleView.setPadding(0, 0, 25, 0);
             titleView.setGravity(Gravity.CENTER_VERTICAL);
-            titleView.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.MATCH_PARENT));
+                LinearLayout.LayoutParams.MATCH_PARENT);
+            titleParams.setMargins(0, 0, 30, 0);
+            titleView.setLayoutParams(titleParams);
             titleView.setMaxWidth((int)(150 * getResources().getDisplayMetrics().density));
             titleView.setSingleLine(true);
             titleView.setEllipsize(android.text.TextUtils.TruncateAt.END);
@@ -1869,6 +1870,15 @@ public class IDEActivity extends AppCompatActivity {
     }
 
     private void highlightMatchingBracket() {
+        // Clear previous highlights
+        android.text.Spannable spannable = editor.getText();
+        android.text.style.BackgroundColorSpan[] spans = spannable.getSpans(0, spannable.length(), android.text.style.BackgroundColorSpan.class);
+        for (android.text.style.BackgroundColorSpan span : spans) {
+            if (spannable.getSpanStart(span) != -1) {
+                spannable.removeSpan(span);
+            }
+        }
+        
         int pos = editor.getSelectionStart();
         String text = editor.getText().toString();
         
@@ -1891,9 +1901,8 @@ public class IDEActivity extends AppCompatActivity {
         
         int matchPos = findMatchingBracket(text, pos, ch, match, forward);
         if (matchPos != -1) {
-            android.text.Spannable spannable = editor.getText();
             SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
-            boolean isDark = themePrefs.getBoolean("darkMode", false);
+            boolean isDark = themePrefs.getBoolean("darkMode", true);
             int highlightColor = isDark ? 0x4400FF00 : 0x4400FF00;
             
             spannable.setSpan(new android.text.style.BackgroundColorSpan(highlightColor),

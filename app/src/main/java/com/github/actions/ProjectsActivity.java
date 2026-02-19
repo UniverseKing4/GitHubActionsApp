@@ -59,7 +59,9 @@ public class ProjectsActivity extends AppCompatActivity {
             (int)(2 * getResources().getDisplayMetrics().density)));
         underline.setBackgroundColor(isDark ? 0xFFFFFFFF : 0xFF000000);
         title.post(() -> {
-            underline.getLayoutParams().width = title.getWidth();
+            android.graphics.Paint paint = title.getPaint();
+            int textWidth = (int) paint.measureText("GitCode");
+            underline.getLayoutParams().width = textWidth;
             underline.requestLayout();
         });
         mainLayout.addView(underline);
@@ -375,20 +377,41 @@ public class ProjectsActivity extends AppCompatActivity {
                 android.view.View child = layout.getChildAt(i);
                 if (child instanceof LinearLayout) {
                     LinearLayout row = (LinearLayout) child;
-                    if (row.getChildCount() > 0 && row.getChildAt(0) instanceof Button) {
-                        Button btn = (Button) row.getChildAt(0);
-                        String btnText = btn.getText().toString().replace("✓ ", "");
-                        if (btnText.equals(username)) {
-                            btn.setOnClickListener(v -> {
-                                profilePrefs.edit().putString("activeProfile", username).apply();
-                                SharedPreferences creds = getSharedPreferences("GitHubCreds", MODE_PRIVATE);
-                                creds.edit()
-                                    .putString("username", parts[0])
-                                    .putString("token", parts[1])
-                                    .apply();
-                                Toast.makeText(this, "Active: " + username, Toast.LENGTH_SHORT).show();
-                                dialog.dismiss();
-                                showProfiles();
+                    if (row.getChildCount() >= 2) {
+                        if (row.getChildAt(0) instanceof Button) {
+                            Button btn = (Button) row.getChildAt(0);
+                            String btnText = btn.getText().toString().replace("✓ ", "");
+                            if (btnText.equals(username)) {
+                                btn.setOnClickListener(v -> {
+                                    profilePrefs.edit().putString("activeProfile", username).apply();
+                                    SharedPreferences creds = getSharedPreferences("GitHubCreds", MODE_PRIVATE);
+                                    creds.edit()
+                                        .putString("username", parts[0])
+                                        .putString("token", parts[1])
+                                        .apply();
+                                    Toast.makeText(this, "Active: " + username, Toast.LENGTH_SHORT).show();
+                                    dialog.dismiss();
+                                    showProfiles();
+                                });
+                            }
+                        }
+                        if (row.getChildAt(1) instanceof Button) {
+                            Button btnDel = (Button) row.getChildAt(1);
+                            btnDel.setOnClickListener(v -> {
+                                new AlertDialog.Builder(this)
+                                    .setTitle("Delete Profile")
+                                    .setMessage("Delete profile: " + username + "?")
+                                    .setPositiveButton("Delete", (d, w) -> {
+                                        String newProfiles = profiles.replace(profile + ";", "");
+                                        profilePrefs.edit().putString("profiles", newProfiles).apply();
+                                        if (username.equals(activeProfile)) {
+                                            profilePrefs.edit().remove("activeProfile").apply();
+                                        }
+                                        dialog.dismiss();
+                                        showProfiles();
+                                    })
+                                    .setNegativeButton("Cancel", null)
+                                    .show();
                             });
                         }
                     }
