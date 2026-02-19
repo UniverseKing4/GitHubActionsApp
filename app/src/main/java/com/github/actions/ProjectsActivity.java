@@ -63,7 +63,7 @@ public class ProjectsActivity extends AppCompatActivity {
         mainLayout.addView(btnClone);
         
         Button btnProfiles = new Button(this);
-        btnProfiles.setText("⚙ GitHub Profiles");
+        btnProfiles.setText("👤 GitHub Profiles");
         btnProfiles.setOnClickListener(v -> showProfiles());
         mainLayout.addView(btnProfiles);
         
@@ -209,7 +209,7 @@ public class ProjectsActivity extends AppCompatActivity {
             projectItem.addView(btn);
             
             Button btnEdit = new Button(this);
-            btnEdit.setText("✏");
+            btnEdit.setText("✏️");
             btnEdit.setOnClickListener(v -> editProject(actualName, path));
             projectItem.addView(btnEdit);
             

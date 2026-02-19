@@ -862,6 +862,7 @@ public class IDEActivity extends AppCompatActivity {
                 } else {
                     selectedFiles.remove(file);
                 }
+                updateFileMenuButtons();
             });
             rowLayout.addView(cb);
         }
@@ -1473,6 +1474,22 @@ public class IDEActivity extends AppCompatActivity {
         int i = fileName.lastIndexOf('.');
         if (i > 0) {
             ext = fileName.substring(i + 1).toLowerCase();
+        }
+        
+        // Only apply syntax highlighting for code files
+        String[] codeExtensions = {"java", "js", "jsx", "ts", "tsx", "py", "html", "xml", "css", "scss", "sass", 
+                                    "c", "cpp", "h", "hpp", "go", "rs", "php", "rb", "swift", "kt", "json", "yaml", "yml"};
+        boolean isCodeFile = false;
+        for (String codeExt : codeExtensions) {
+            if (ext.equals(codeExt)) {
+                isCodeFile = true;
+                break;
+            }
+        }
+        
+        if (!isCodeFile) {
+            editor.setText(content);
+            return;
         }
         
         try {
