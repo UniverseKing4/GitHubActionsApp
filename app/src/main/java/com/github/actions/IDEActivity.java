@@ -439,10 +439,13 @@ public class IDEActivity extends AppCompatActivity {
             
             // Create title with project name
             TextView titleView = new TextView(this);
-            titleView.setText("📁 " + projectName);
+            titleView.setText(projectName);
             titleView.setTextColor(isDark ? 0xFFFFFFFF : 0xFF000000);
-            titleView.setTextSize(18);
-            titleView.setPadding(0, 0, 20, 0);
+            titleView.setTextSize(14);
+            titleView.setPadding(0, 0, 10, 0);
+            titleView.setMaxWidth((int)(150 * getResources().getDisplayMetrics().density));
+            titleView.setSingleLine(true);
+            titleView.setEllipsize(android.text.TextUtils.TruncateAt.END);
             
             getSupportActionBar().setDisplayShowTitleEnabled(false);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -1422,8 +1425,10 @@ public class IDEActivity extends AppCompatActivity {
     private void addCompactButton(LinearLayout toolbar, String icon, View.OnClickListener listener) {
         android.widget.Button btn = new android.widget.Button(this);
         btn.setText(icon);
-        btn.setTextSize(18);
-        btn.setPadding(20, 0, 20, 0);
+        btn.setTextSize(16);
+        btn.setPadding(12, 0, 12, 0);
+        btn.setMinWidth(0);
+        btn.setMinimumWidth(0);
         btn.setOnClickListener(listener);
         btn.setBackgroundColor(0x00000000);
         btn.setLayoutParams(new LinearLayout.LayoutParams(
