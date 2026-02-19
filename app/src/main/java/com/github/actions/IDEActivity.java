@@ -36,6 +36,9 @@ public class IDEActivity extends AppCompatActivity {
     private java.util.Set<File> selectedFiles = new java.util.HashSet<>();
     private android.os.Handler autoSaveHandler = new android.os.Handler();
     private Runnable autoSaveRunnable;
+    private android.os.Handler syntaxHandler = new android.os.Handler();
+    private Runnable syntaxRunnable;
+    private String lastHighlightedText = "";
     private java.util.Stack<String> undoStack = new java.util.Stack<>();
     private java.util.Stack<String> redoStack = new java.util.Stack<>();
     private boolean isUndoRedo = false;
@@ -204,6 +207,17 @@ public class IDEActivity extends AppCompatActivity {
             }
         };
         
+        // Syntax highlighting setup
+        syntaxRunnable = () -> {
+            if (currentFile != null) {
+                String currentText = editor.getText().toString();
+                if (!currentText.equals(lastHighlightedText)) {
+                    applySyntaxHighlighting(currentFile.getName(), currentText);
+                    lastHighlightedText = currentText;
+                }
+            }
+        };
+        
         // Auto-indent and auto-brackets
         editor.addTextChangedListener(new android.text.TextWatcher() {
             private String before = "";
@@ -229,6 +243,10 @@ public class IDEActivity extends AppCompatActivity {
                 // Trigger auto-save after 2 seconds of inactivity
                 autoSaveHandler.removeCallbacks(autoSaveRunnable);
                 autoSaveHandler.postDelayed(autoSaveRunnable, 2000);
+                
+                // Trigger syntax highlighting after 2 seconds of inactivity
+                syntaxHandler.removeCallbacks(syntaxRunnable);
+                syntaxHandler.postDelayed(syntaxRunnable, 2000);
                 
                 // Track for undo/redo with time-based grouping
                 if (!isUndoRedo && !text.equals(before)) {
@@ -455,7 +473,7 @@ public class IDEActivity extends AppCompatActivity {
             LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
-            titleParams.setMargins(0, 0, 30, 0);
+            titleParams.setMargins(0, 0, 50, 0);
             titleView.setLayoutParams(titleParams);
             titleView.setMaxWidth((int)(150 * getResources().getDisplayMetrics().density));
             titleView.setSingleLine(true);
@@ -1320,6 +1338,11 @@ public class IDEActivity extends AppCompatActivity {
 
     private void openFile(File file) {
         try {
+            // Auto-save current file before switching
+            if (currentFile != null && !currentFile.equals(file)) {
+                autoSaveFile();
+            }
+            
             FileInputStream fis = new FileInputStream(file);
             byte[] data = new byte[(int) file.length()];
             fis.read(data);
