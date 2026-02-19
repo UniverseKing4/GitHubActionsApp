@@ -214,9 +214,27 @@ public class ProjectsActivity extends AppCompatActivity {
             
             File dir = new File(savedPath);
             
-            // If path doesn't exist, try to find by name in GitCode directory
-            if (!dir.exists() && allFolders.containsKey(savedName)) {
-                dir = allFolders.get(savedName);
+            // If exact path doesn't exist
+            if (!dir.exists()) {
+                // Try to find by saved name in GitCode directory
+                if (allFolders.containsKey(savedName)) {
+                    dir = allFolders.get(savedName);
+                } else {
+                    // Check if parent directory exists and has a different folder
+                    File parentDir = new File(savedPath).getParentFile();
+                    if (parentDir != null && parentDir.exists()) {
+                        File[] siblings = parentDir.listFiles();
+                        if (siblings != null && siblings.length > 0) {
+                            // If there's a folder in the same parent, assume it's renamed
+                            for (File sibling : siblings) {
+                                if (sibling.isDirectory()) {
+                                    dir = sibling;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
             }
             
             // Skip if still not found

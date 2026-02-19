@@ -469,11 +469,12 @@ public class IDEActivity extends AppCompatActivity {
             titleView.setText(projectName);
             titleView.setTextColor(isDark ? 0xFFFFFFFF : 0xFF000000);
             titleView.setTextSize(14);
+            titleView.setPadding(10, 0, 10, 0);
             titleView.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
             LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
-            titleParams.setMargins(-20, 0, 20, 0);
+            titleParams.setMargins(0, 0, 20, 0);
             titleView.setLayoutParams(titleParams);
             titleView.setMaxWidth((int)(150 * getResources().getDisplayMetrics().density));
             titleView.setSingleLine(true);
