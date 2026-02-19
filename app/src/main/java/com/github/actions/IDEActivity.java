@@ -725,29 +725,59 @@ public class IDEActivity extends AppCompatActivity {
         }
     }
 
+    private int currentFindIndex = 0;
+    private java.util.List<Integer> findOccurrences = new java.util.ArrayList<>();
+    private String lastSearchText = "";
+    
     private void showFindDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Find");
+        
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 20, 50, 20);
+        
         EditText input = new EditText(this);
         input.setHint("Search text");
-        input.setPadding(50, 20, 50, 20);
-        builder.setView(input);
-        builder.setPositiveButton("Find", (d, w) -> {
+        input.setText(lastSearchText);
+        layout.addView(input);
+        
+        TextView countText = new TextView(this);
+        countText.setPadding(0, 10, 0, 10);
+        layout.addView(countText);
+        
+        builder.setView(layout);
+        builder.setPositiveButton("Find All", (d, w) -> {
             String search = input.getText().toString();
             if (!search.isEmpty()) {
+                lastSearchText = search;
+                findOccurrences.clear();
+                currentFindIndex = 0;
+                
                 String text = editor.getText().toString();
-                int start = editor.getSelectionStart();
-                int index = text.indexOf(search, start);
-                if (index < 0) {
-                    index = text.indexOf(search);
+                int index = 0;
+                while ((index = text.indexOf(search, index)) >= 0) {
+                    findOccurrences.add(index);
+                    index += search.length();
                 }
-                if (index >= 0) {
-                    editor.setSelection(index, index + search.length());
+                
+                if (!findOccurrences.isEmpty()) {
+                    int pos = findOccurrences.get(0);
+                    editor.setSelection(pos, pos + search.length());
                     editor.requestFocus();
-                    Toast.makeText(this, "Found at position " + index, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Found " + findOccurrences.size() + " occurrences", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(this, "Not found", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+        builder.setNeutralButton("Next", (d, w) -> {
+            if (!findOccurrences.isEmpty() && !lastSearchText.isEmpty()) {
+                currentFindIndex = (currentFindIndex + 1) % findOccurrences.size();
+                int pos = findOccurrences.get(currentFindIndex);
+                editor.setSelection(pos, pos + lastSearchText.length());
+                editor.requestFocus();
+                Toast.makeText(this, (currentFindIndex + 1) + " of " + findOccurrences.size(), Toast.LENGTH_SHORT).show();
             }
         });
         builder.setNegativeButton("Cancel", null);
@@ -785,10 +815,34 @@ public class IDEActivity extends AppCompatActivity {
                 
                 if (count > 0) {
                     String newText = text.replace(find, replace);
+                    int cursorPos = editor.getSelectionStart();
                     editor.setText(newText);
+                    if (cursorPos <= newText.length()) {
+                        editor.setSelection(cursorPos);
+                    }
                     Toast.makeText(this, "Replaced " + count + " occurrences", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(this, "No occurrences found", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        builder.setNeutralButton("Replace Next", (d, w) -> {
+            String find = findInput.getText().toString();
+            String replace = replaceInput.getText().toString();
+            if (!find.isEmpty()) {
+                String text = editor.getText().toString();
+                int start = editor.getSelectionStart();
+                int index = text.indexOf(find, start);
+                if (index < 0) {
+                    index = text.indexOf(find);
+                }
+                if (index >= 0) {
+                    String newText = text.substring(0, index) + replace + text.substring(index + find.length());
+                    editor.setText(newText);
+                    editor.setSelection(index, index + replace.length());
+                    Toast.makeText(this, "Replaced 1 occurrence", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "No more occurrences", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -2072,6 +2126,7 @@ public class IDEActivity extends AppCompatActivity {
                     File file = new File(projectPath, filePath);
                     file.getParentFile().mkdirs();
                     try {
+                        // Overwrite local file with remote content
                         java.io.FileOutputStream fos = new java.io.FileOutputStream(file);
                         fos.write(content.getBytes());
                         fos.close();
@@ -2085,7 +2140,7 @@ public class IDEActivity extends AppCompatActivity {
             int finalPulled = pulled;
             runOnUiThread(() -> {
                 if (finalPulled > 0) {
-                    Toast.makeText(this, "✓ Pulled " + finalPulled + " files", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "✓ Pulled " + finalPulled + " files from GitHub", Toast.LENGTH_LONG).show();
                     loadFiles();
                     if (currentFile != null && currentFile.exists()) {
                         openFile(currentFile);
