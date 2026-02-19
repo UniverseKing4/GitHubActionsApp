@@ -43,6 +43,8 @@ public class IDEActivity extends AppCompatActivity {
     private static final long UNDO_DELAY = 1000; // 1 second
     private boolean wordWrapEnabled = true;
     private android.text.style.BackgroundColorSpan bracketHighlight;
+    private java.util.List<File> openTabs = new java.util.ArrayList<>();
+    private LinearLayout tabBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +86,20 @@ public class IDEActivity extends AppCompatActivity {
             mainLayout.setBackgroundColor(0xFF1E1E1E);
         }
         
+        // Tab bar
+        ScrollView tabScroll = new ScrollView(this);
+        tabScroll.setHorizontalScrollBarEnabled(false);
+        tabScroll.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT));
+        
+        tabBar = new LinearLayout(this);
+        tabBar.setOrientation(LinearLayout.HORIZONTAL);
+        tabBar.setBackgroundColor(isDark ? 0xFF2D2D2D : 0xFFE0E0E0);
+        tabBar.setPadding(5, 5, 5, 5);
+        tabScroll.addView(tabBar);
+        mainLayout.addView(tabScroll);
+        
         // Editor container
         LinearLayout editorContainer = new LinearLayout(this);
         editorContainer.setOrientation(LinearLayout.HORIZONTAL);
@@ -104,7 +120,12 @@ public class IDEActivity extends AppCompatActivity {
         
         lineNumbers = new TextView(this);
         lineNumbers.setTypeface(android.graphics.Typeface.MONOSPACE);
-        lineNumbers.setTextSize(14);
+        
+        // Load saved font size
+        SharedPreferences settingsPrefs = getSharedPreferences("GitCodeSettings", MODE_PRIVATE);
+        int fontSize = settingsPrefs.getInt("fontSize", 14);
+        lineNumbers.setTextSize(fontSize);
+        
         lineNumbers.setGravity(Gravity.TOP | Gravity.END);
         lineNumbers.setPadding(5, 20, 8, 20);
         lineNumbers.setBackgroundColor(isDark ? 0xFF2D2D2D : 0xFFF5F5F5);
@@ -131,7 +152,12 @@ public class IDEActivity extends AppCompatActivity {
             LinearLayout.LayoutParams.WRAP_CONTENT));
         editor.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
         editor.setTypeface(android.graphics.Typeface.MONOSPACE);
-        editor.setTextSize(14);
+        
+        // Load saved font size
+        SharedPreferences settingsPrefs = getSharedPreferences("GitCodeSettings", MODE_PRIVATE);
+        int fontSize = settingsPrefs.getInt("fontSize", 14);
+        editor.setTextSize(fontSize);
+        
         editor.setLineSpacing(0, 1.0f);
         editor.setGravity(Gravity.TOP | Gravity.START);
         editor.setPadding(10, 20, 15, 20);
@@ -335,6 +361,9 @@ public class IDEActivity extends AppCompatActivity {
             }
         });
         
+        // Bracket matching
+        editor.setOnClickListener(v -> highlightMatchingBracket());
+        
         editorScroll.addView(editor);
         editorContainer.addView(editorScroll);
         
@@ -442,6 +471,8 @@ public class IDEActivity extends AppCompatActivity {
         menu.add(0, 6, 0, "Delete Line");
         menu.add(0, 7, 0, "Word Wrap: ON");
         menu.add(0, 8, 0, "⬇ Pull from GitHub");
+        menu.add(0, 9, 0, "📊 Project Statistics");
+        menu.add(0, 10, 0, "⚙ Settings");
         return true;
     }
 
@@ -479,8 +510,57 @@ public class IDEActivity extends AppCompatActivity {
             case 8:
                 pullFromGitHub();
                 return true;
+            case 9:
+                showProjectStats();
+                return true;
+            case 10:
+                showSettings();
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showSettings() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Editor Settings");
+        
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 20, 50, 20);
+        
+        TextView label = new TextView(this);
+        label.setText("Font Size:");
+        layout.addView(label);
+        
+        android.widget.SeekBar seekBar = new android.widget.SeekBar(this);
+        seekBar.setMax(20);
+        seekBar.setProgress((int)editor.getTextSize() / 2 - 10);
+        
+        TextView sizeLabel = new TextView(this);
+        sizeLabel.setText("Current: " + (int)editor.getTextSize() / 2 + "sp");
+        layout.addView(sizeLabel);
+        
+        seekBar.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser) {
+                int size = progress + 10;
+                sizeLabel.setText("Current: " + size + "sp");
+            }
+            public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+            public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
+        });
+        layout.addView(seekBar);
+        
+        builder.setView(layout);
+        builder.setPositiveButton("Apply", (d, w) -> {
+            int size = seekBar.getProgress() + 10;
+            editor.setTextSize(size);
+            lineNumbers.setTextSize(size);
+            SharedPreferences prefs = getSharedPreferences("GitCodeSettings", MODE_PRIVATE);
+            prefs.edit().putInt("fontSize", size).apply();
+            Toast.makeText(this, "Font size updated", Toast.LENGTH_SHORT).show();
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
     }
 
     private void toggleWordWrap(MenuItem item) {
@@ -1169,6 +1249,14 @@ public class IDEActivity extends AppCompatActivity {
             editor.setText(content);
             applySyntaxHighlighting(file.getName(), content);
             
+            // Add to tabs if not already open
+            if (!openTabs.contains(file)) {
+                openTabs.add(file);
+                updateTabBar();
+            } else {
+                highlightActiveTab(file);
+            }
+            
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setSubtitle(file.getName());
             }
@@ -1176,6 +1264,66 @@ public class IDEActivity extends AppCompatActivity {
         } catch (Exception e) {
             Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void updateTabBar() {
+        SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
+        boolean isDark = themePrefs.getBoolean("darkMode", false);
+        
+        tabBar.removeAllViews();
+        for (File file : openTabs) {
+            LinearLayout tab = new LinearLayout(this);
+            tab.setOrientation(LinearLayout.HORIZONTAL);
+            tab.setPadding(15, 10, 15, 10);
+            tab.setBackgroundColor(file.equals(currentFile) ? 
+                (isDark ? 0xFF1E1E1E : 0xFFFFFFFF) : 
+                (isDark ? 0xFF2D2D2D : 0xFFE0E0E0));
+            
+            TextView tabText = new TextView(this);
+            tabText.setText(file.getName());
+            tabText.setTextColor(isDark ? 0xFFE0E0E0 : 0xFF000000);
+            tabText.setTextSize(14);
+            tabText.setPadding(0, 0, 10, 0);
+            tab.addView(tabText);
+            
+            TextView closeBtn = new TextView(this);
+            closeBtn.setText("×");
+            closeBtn.setTextSize(18);
+            closeBtn.setTextColor(isDark ? 0xFFE0E0E0 : 0xFF000000);
+            closeBtn.setOnClickListener(v -> closeTab(file));
+            tab.addView(closeBtn);
+            
+            tab.setOnClickListener(v -> openFile(file));
+            tabBar.addView(tab);
+        }
+    }
+
+    private void highlightActiveTab(File file) {
+        SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
+        boolean isDark = themePrefs.getBoolean("darkMode", false);
+        
+        for (int i = 0; i < tabBar.getChildCount(); i++) {
+            LinearLayout tab = (LinearLayout) tabBar.getChildAt(i);
+            tab.setBackgroundColor(openTabs.get(i).equals(file) ? 
+                (isDark ? 0xFF1E1E1E : 0xFFFFFFFF) : 
+                (isDark ? 0xFF2D2D2D : 0xFFE0E0E0));
+        }
+    }
+
+    private void closeTab(File file) {
+        openTabs.remove(file);
+        if (file.equals(currentFile)) {
+            if (!openTabs.isEmpty()) {
+                openFile(openTabs.get(openTabs.size() - 1));
+            } else {
+                currentFile = null;
+                editor.setText("");
+                if (getSupportActionBar() != null) {
+                    getSupportActionBar().setSubtitle("");
+                }
+            }
+        }
+        updateTabBar();
     }
 
     private void updateLineNumbers(TextView lineNumbers, String text) {
@@ -1595,6 +1743,109 @@ public class IDEActivity extends AppCompatActivity {
         super.onDestroy();
         autoSaveHandler.removeCallbacks(autoSaveRunnable);
         executor.shutdown();
+    }
+
+    private void highlightMatchingBracket() {
+        int pos = editor.getSelectionStart();
+        String text = editor.getText().toString();
+        
+        if (pos < 0 || pos >= text.length()) return;
+        
+        char ch = text.charAt(pos);
+        char match = 0;
+        boolean forward = false;
+        
+        switch (ch) {
+            case '(': match = ')'; forward = true; break;
+            case '[': match = ']'; forward = true; break;
+            case '{': match = '}'; forward = true; break;
+            case ')': match = '('; break;
+            case ']': match = '['; break;
+            case '}': match = '{'; break;
+        }
+        
+        if (match == 0) return;
+        
+        int matchPos = findMatchingBracket(text, pos, ch, match, forward);
+        if (matchPos != -1) {
+            android.text.Spannable spannable = editor.getText();
+            SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
+            boolean isDark = themePrefs.getBoolean("darkMode", false);
+            int highlightColor = isDark ? 0x4400FF00 : 0x4400FF00;
+            
+            spannable.setSpan(new android.text.style.BackgroundColorSpan(highlightColor),
+                pos, pos + 1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannable.setSpan(new android.text.style.BackgroundColorSpan(highlightColor),
+                matchPos, matchPos + 1, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+    }
+
+    private int findMatchingBracket(String text, int pos, char open, char close, boolean forward) {
+        int count = 1;
+        int i = forward ? pos + 1 : pos - 1;
+        
+        while (forward ? i < text.length() : i >= 0) {
+            char ch = text.charAt(i);
+            if (ch == open) count++;
+            else if (ch == close) count--;
+            
+            if (count == 0) return i;
+            i += forward ? 1 : -1;
+        }
+        return -1;
+    }
+
+    private void showProjectStats() {
+        File dir = new File(projectPath);
+        int[] stats = calculateStats(dir);
+        
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Project Statistics");
+        
+        TextView tv = new TextView(this);
+        tv.setPadding(50, 40, 50, 40);
+        tv.setText(
+            "Files: " + stats[0] + "\n" +
+            "Folders: " + stats[1] + "\n" +
+            "Lines of Code: " + stats[2] + "\n" +
+            "Characters: " + stats[3]
+        );
+        tv.setTextSize(16);
+        
+        builder.setView(tv);
+        builder.setPositiveButton("OK", null);
+        builder.show();
+    }
+
+    private int[] calculateStats(File dir) {
+        int[] stats = new int[4]; // files, folders, lines, chars
+        File[] files = dir.listFiles();
+        if (files == null) return stats;
+        
+        for (File file : files) {
+            if (file.isDirectory()) {
+                stats[1]++;
+                int[] subStats = calculateStats(file);
+                stats[0] += subStats[0];
+                stats[1] += subStats[1];
+                stats[2] += subStats[2];
+                stats[3] += subStats[3];
+            } else {
+                stats[0]++;
+                try {
+                    FileInputStream fis = new FileInputStream(file);
+                    byte[] data = new byte[(int) file.length()];
+                    fis.read(data);
+                    fis.close();
+                    String content = new String(data);
+                    stats[2] += content.split("\n").length;
+                    stats[3] += content.length();
+                } catch (Exception e) {
+                    // Skip
+                }
+            }
+        }
+        return stats;
     }
 
     private void pullFromGitHub() {
