@@ -201,12 +201,32 @@ public class ProjectsActivity extends AppCompatActivity {
             String path = parts[1];
             
             File dir = new File(path);
-            if (!dir.exists()) continue;
+            
+            // If path doesn't exist, try to find renamed folder in parent directory
+            if (!dir.exists()) {
+                File parentDir = dir.getParentFile();
+                if (parentDir != null && parentDir.exists()) {
+                    // Look for a folder with the same name in parent directory
+                    File[] siblings = parentDir.listFiles();
+                    if (siblings != null) {
+                        for (File sibling : siblings) {
+                            if (sibling.isDirectory() && sibling.getName().equals(name)) {
+                                dir = sibling;
+                                path = sibling.getAbsolutePath();
+                                break;
+                            }
+                        }
+                    }
+                }
+                // If still not found, skip this project
+                if (!dir.exists()) continue;
+            }
             
             // Get actual folder name from path
             String actualName = dir.getName();
+            String actualPath = dir.getAbsolutePath();
             
-            validProjects.append(actualName).append("|").append(path).append(";");
+            validProjects.append(actualName).append("|").append(actualPath).append(";");
             
             LinearLayout projectItem = new LinearLayout(this);
             projectItem.setOrientation(LinearLayout.HORIZONTAL);
@@ -216,7 +236,7 @@ public class ProjectsActivity extends AppCompatActivity {
             btn.setText("📁 " + actualName);
             btn.setTransformationMethod(null); // Prevent auto-capitalization
             btn.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-            btn.setOnClickListener(v -> openProject(actualName, path));
+            btn.setOnClickListener(v -> openProject(actualName, actualPath));
             projectItem.addView(btn);
             
             Button btnEdit = new Button(this);
@@ -225,7 +245,7 @@ public class ProjectsActivity extends AppCompatActivity {
             btnEdit.setMinWidth(0);
             btnEdit.setMinimumWidth(0);
             btnEdit.setPadding(20, 0, 20, 0);
-            btnEdit.setOnClickListener(v -> editProject(actualName, path));
+            btnEdit.setOnClickListener(v -> editProject(actualName, actualPath));
             projectItem.addView(btnEdit);
             
             Button btnDelete = new Button(this);
@@ -234,7 +254,7 @@ public class ProjectsActivity extends AppCompatActivity {
             btnDelete.setMinWidth(0);
             btnDelete.setMinimumWidth(0);
             btnDelete.setPadding(20, 0, 20, 0);
-            btnDelete.setOnClickListener(v -> deleteProject(actualName, path));
+            btnDelete.setOnClickListener(v -> deleteProject(actualName, actualPath));
             projectItem.addView(btnDelete);
             
             projectsList.addView(projectItem);

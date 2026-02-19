@@ -1406,7 +1406,14 @@ public class IDEActivity extends AppCompatActivity {
             closeBtn.setOnClickListener(v -> closeTab(file));
             tab.addView(closeBtn);
             
-            tab.setOnClickListener(v -> openFile(file));
+            tab.setOnClickListener(v -> {
+                // Auto-save if clicking same tab
+                if (currentFile != null && currentFile.equals(file)) {
+                    autoSaveFile();
+                } else {
+                    openFile(file);
+                }
+            });
             tabBar.addView(tab);
         }
     }
