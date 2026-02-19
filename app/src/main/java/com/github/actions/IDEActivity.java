@@ -127,7 +127,7 @@ public class IDEActivity extends AppCompatActivity {
         lineNumbers.setTextSize(fontSize);
         
         lineNumbers.setGravity(Gravity.TOP | Gravity.END);
-        lineNumbers.setPadding(3, 20, 5, 20);
+        lineNumbers.setPadding(2, 20, 2, 20);
         lineNumbers.setBackgroundColor(isDark ? 0xFF2D2D2D : 0xFFF5F5F5);
         lineNumbers.setTextColor(isDark ? 0xFF666666 : 0xFF999999);
         lineNumbers.setLineSpacing(0, 1.0f);
@@ -455,6 +455,42 @@ public class IDEActivity extends AppCompatActivity {
         }
         
         loadFiles();
+        
+        // Open last file or show welcome message
+        SharedPreferences filePrefs = getSharedPreferences("GitCodeFiles", MODE_PRIVATE);
+        String lastFile = filePrefs.getString("lastFile_" + projectName, "");
+        
+        if (!lastFile.isEmpty()) {
+            File file = new File(lastFile);
+            if (file.exists()) {
+                openFile(file);
+            } else {
+                showWelcomeMessage();
+            }
+        } else {
+            showWelcomeMessage();
+        }
+    }
+
+    private void showWelcomeMessage() {
+        File dir = new File(projectPath);
+        File[] files = dir.listFiles();
+        
+        if (files == null || files.length == 0) {
+            editor.setText("No files in project.\n\nTap the menu icon (☰) to create a new file or folder.");
+            editor.setEnabled(false);
+        } else {
+            // Find first file and open it
+            for (File file : files) {
+                if (file.isFile()) {
+                    openFile(file);
+                    return;
+                }
+            }
+            // If only folders exist
+            editor.setText("No files in project.\n\nTap the menu icon (☰) to create a new file.");
+            editor.setEnabled(false);
+        }
     }
 
     @Override
@@ -1245,7 +1281,12 @@ public class IDEActivity extends AppCompatActivity {
             redoStack.clear();
             
             editor.setText(content);
+            editor.setEnabled(true);
             applySyntaxHighlighting(file.getName(), content);
+            
+            // Save as last opened file
+            SharedPreferences filePrefs = getSharedPreferences("GitCodeFiles", MODE_PRIVATE);
+            filePrefs.edit().putString("lastFile_" + projectName, file.getAbsolutePath()).apply();
             
             // Add to tabs if not already open
             if (!openTabs.contains(file)) {
@@ -1337,9 +1378,9 @@ public class IDEActivity extends AppCompatActivity {
         }
         lineNumbers.setText(sb.toString());
         
-        // Dynamically adjust width based on number of digits (more compact)
+        // Dynamically adjust width based on digits - very compact
         int digits = String.valueOf(lines).length();
-        int width = (int)((15 + digits * 8) * getResources().getDisplayMetrics().density);
+        int width = (int)((10 + digits * 9) * getResources().getDisplayMetrics().density);
         lineNumberScroll.getLayoutParams().width = width;
         lineNumberScroll.requestLayout();
         
