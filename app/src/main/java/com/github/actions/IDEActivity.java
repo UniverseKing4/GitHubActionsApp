@@ -391,28 +391,37 @@ public class IDEActivity extends AppCompatActivity {
         
         LinearLayout btnContainer = new LinearLayout(this);
         btnContainer.setOrientation(LinearLayout.HORIZONTAL);
-        btnContainer.setPadding(10, 0, 10, 10);
+        btnContainer.setPadding(5, 0, 5, 10);
+        btnContainer.setId(View.generateViewId());
         
         android.widget.Button btnNewFile = new android.widget.Button(this);
-        btnNewFile.setText("+ File");
+        btnNewFile.setText("File");
+        btnNewFile.setTextSize(12);
         btnNewFile.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
         btnNewFile.setOnClickListener(v -> createNewFile());
         btnContainer.addView(btnNewFile);
         
         android.widget.Button btnNewFolder = new android.widget.Button(this);
-        btnNewFolder.setText("+ Folder");
+        btnNewFolder.setText("Folder");
+        btnNewFolder.setTextSize(12);
         btnNewFolder.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
         btnNewFolder.setOnClickListener(v -> createNewFolder());
         btnContainer.addView(btnNewFolder);
         
         android.widget.Button btnSelect = new android.widget.Button(this);
         btnSelect.setText("Select");
+        btnSelect.setTextSize(12);
         btnSelect.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-        btnSelect.setOnClickListener(v -> toggleSelectionMode());
+        btnSelect.setTag("selectBtn");
+        btnSelect.setOnClickListener(v -> {
+            toggleSelectionMode();
+            updateFileMenuButtons();
+        });
         btnContainer.addView(btnSelect);
         
         android.widget.Button btnActions = new android.widget.Button(this);
         btnActions.setText("Actions");
+        btnActions.setTextSize(12);
         btnActions.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
         btnActions.setVisibility(View.GONE);
         btnActions.setTag("actionsBtn");
@@ -442,7 +451,8 @@ public class IDEActivity extends AppCompatActivity {
             titleView.setText(projectName);
             titleView.setTextColor(isDark ? 0xFFFFFFFF : 0xFF000000);
             titleView.setTextSize(14);
-            titleView.setPadding(0, 0, 10, 0);
+            titleView.setPadding(5, 0, 10, 0);
+            titleView.setGravity(Gravity.CENTER_VERTICAL);
             titleView.setMaxWidth((int)(150 * getResources().getDisplayMetrics().density));
             titleView.setSingleLine(true);
             titleView.setEllipsize(android.text.TextUtils.TruncateAt.END);
@@ -976,9 +986,19 @@ public class IDEActivity extends AppCompatActivity {
     }
 
     private void updateActionsButton() {
-        View drawer = findViewById(android.R.id.content).getRootView().findViewWithTag("actionsBtn");
-        if (drawer != null) {
-            drawer.setVisibility(selectionMode ? View.VISIBLE : View.GONE);
+        updateFileMenuButtons();
+    }
+
+    private void updateFileMenuButtons() {
+        View selectBtn = findViewById(android.R.id.content).getRootView().findViewWithTag("selectBtn");
+        View actionsBtn = findViewById(android.R.id.content).getRootView().findViewWithTag("actionsBtn");
+        
+        if (selectionMode && !selectedFiles.isEmpty()) {
+            if (selectBtn != null) selectBtn.setVisibility(View.GONE);
+            if (actionsBtn != null) actionsBtn.setVisibility(View.VISIBLE);
+        } else {
+            if (selectBtn != null) selectBtn.setVisibility(View.VISIBLE);
+            if (actionsBtn != null) actionsBtn.setVisibility(View.GONE);
         }
     }
 
@@ -1385,7 +1405,8 @@ public class IDEActivity extends AppCompatActivity {
                 openFile(openTabs.get(openTabs.size() - 1));
             } else {
                 currentFile = null;
-                editor.setText("");
+                editor.setText("No files open.\n\nTap the menu icon (☰) to open a file.");
+                editor.setEnabled(false);
                 if (getSupportActionBar() != null) {
                     getSupportActionBar().setSubtitle("");
                 }
@@ -1425,15 +1446,17 @@ public class IDEActivity extends AppCompatActivity {
     private void addCompactButton(LinearLayout toolbar, String icon, View.OnClickListener listener) {
         android.widget.Button btn = new android.widget.Button(this);
         btn.setText(icon);
-        btn.setTextSize(16);
-        btn.setPadding(12, 0, 12, 0);
+        btn.setTextSize(17);
+        btn.setPadding(15, 0, 15, 0);
         btn.setMinWidth(0);
         btn.setMinimumWidth(0);
         btn.setOnClickListener(listener);
         btn.setBackgroundColor(0x00000000);
-        btn.setLayoutParams(new LinearLayout.LayoutParams(
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT));
+            LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(5, 0, 5, 0);
+        btn.setLayoutParams(params);
         toolbar.addView(btn);
     }
 
