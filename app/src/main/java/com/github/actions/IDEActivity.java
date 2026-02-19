@@ -557,9 +557,9 @@ public class IDEActivity extends AppCompatActivity {
         menu.add(0, 1, 0, "Find");
         menu.add(0, 2, 0, "Replace");
         menu.add(0, 3, 0, "Go to Line");
-        menu.add(0, 4, 0, "Select All");
-        menu.add(0, 5, 0, "Duplicate Line");
         menu.add(0, 6, 0, "Delete Line");
+        menu.add(0, 5, 0, "Duplicate Line");
+        menu.add(0, 4, 0, "Select All");
         menu.add(0, 7, 0, "Word Wrap: ON");
         menu.add(0, 8, 0, "⬇ Pull from GitHub");
         menu.add(0, 9, 0, "📊 Project Statistics");
@@ -728,6 +728,7 @@ public class IDEActivity extends AppCompatActivity {
     private int currentFindIndex = 0;
     private java.util.List<Integer> findOccurrences = new java.util.ArrayList<>();
     private String lastSearchText = "";
+    private String lastReplaceText = "";
     
     private void showFindDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -794,16 +795,20 @@ public class IDEActivity extends AppCompatActivity {
         
         EditText findInput = new EditText(this);
         findInput.setHint("Find");
+        findInput.setText(lastSearchText);
         layout.addView(findInput);
         
         EditText replaceInput = new EditText(this);
         replaceInput.setHint("Replace with");
+        replaceInput.setText(lastReplaceText);
         layout.addView(replaceInput);
         
         builder.setView(layout);
         builder.setPositiveButton("Replace All", (d, w) -> {
             String find = findInput.getText().toString();
             String replace = replaceInput.getText().toString();
+            lastSearchText = find;
+            lastReplaceText = replace;
             if (!find.isEmpty()) {
                 String text = editor.getText().toString();
                 int count = 0;
@@ -829,6 +834,8 @@ public class IDEActivity extends AppCompatActivity {
         builder.setNeutralButton("Replace Next", (d, w) -> {
             String find = findInput.getText().toString();
             String replace = replaceInput.getText().toString();
+            lastSearchText = find;
+            lastReplaceText = replace;
             if (!find.isEmpty()) {
                 String text = editor.getText().toString();
                 int start = editor.getSelectionStart();
