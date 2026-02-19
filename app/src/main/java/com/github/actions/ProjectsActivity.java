@@ -93,7 +93,7 @@ public class ProjectsActivity extends AppCompatActivity {
         mainLayout.addView(btnSettings);
         
         TextView projectsTitle = new TextView(this);
-        projectsTitle.setText("Recent Projects");
+        projectsTitle.setText("Projects");
         projectsTitle.setTextSize(20);
         projectsTitle.setPadding(0, 40, 0, 20);
         projectsTitle.setTextColor(isDark ? 0xFFFFFFFF : 0xFF000000);
