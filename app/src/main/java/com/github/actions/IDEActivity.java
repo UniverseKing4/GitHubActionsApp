@@ -110,11 +110,11 @@ public class IDEActivity extends AppCompatActivity {
             editorContainer.setBackgroundColor(0xFF1E1E1E);
         }
         
-        // Line numbers
+        // Line numbers - start with minimal width
         lineNumberScroll = new ScrollView(this);
         lineNumberScroll.setVerticalScrollBarEnabled(false);
         LinearLayout.LayoutParams lineNumParams = new LinearLayout.LayoutParams(
-            (int)(30 * getResources().getDisplayMetrics().density),
+            LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.MATCH_PARENT);
         lineNumberScroll.setLayoutParams(lineNumParams);
         
@@ -127,12 +127,12 @@ public class IDEActivity extends AppCompatActivity {
         lineNumbers.setTextSize(fontSize);
         
         lineNumbers.setGravity(Gravity.TOP | Gravity.END);
-        lineNumbers.setPadding(5, 20, 8, 20);
+        lineNumbers.setPadding(3, 20, 5, 20);
         lineNumbers.setBackgroundColor(isDark ? 0xFF2D2D2D : 0xFFF5F5F5);
         lineNumbers.setTextColor(isDark ? 0xFF666666 : 0xFF999999);
         lineNumbers.setLineSpacing(0, 1.0f);
         lineNumbers.setLayoutParams(new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT));
         lineNumberScroll.addView(lineNumbers);
         editorContainer.addView(lineNumberScroll);
@@ -1337,9 +1337,9 @@ public class IDEActivity extends AppCompatActivity {
         }
         lineNumbers.setText(sb.toString());
         
-        // Adjust width based on number of digits
+        // Dynamically adjust width based on number of digits (more compact)
         int digits = String.valueOf(lines).length();
-        int width = (int)((20 + digits * 10) * getResources().getDisplayMetrics().density);
+        int width = (int)((15 + digits * 8) * getResources().getDisplayMetrics().density);
         lineNumberScroll.getLayoutParams().width = width;
         lineNumberScroll.requestLayout();
         
