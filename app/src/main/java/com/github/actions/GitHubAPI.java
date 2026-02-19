@@ -142,29 +142,39 @@ public class GitHubAPI {
 
     public java.util.List<String> getRepoTree() {
         java.util.List<String> files = new java.util.ArrayList<>();
-        try {
-            String url = "https://api.github.com/repos/" + username + "/" + repo + "/git/trees/main?recursive=1";
-            Request request = new Request.Builder()
-                .url(url)
-                .header("Authorization", "token " + token)
-                .get()
-                .build();
+        
+        // Try main branch first, then master
+        String[] branches = {"main", "master"};
+        
+        for (String branch : branches) {
+            try {
+                String url = "https://api.github.com/repos/" + username + "/" + repo + "/git/trees/" + branch + "?recursive=1";
+                Request request = new Request.Builder()
+                    .url(url)
+                    .header("Authorization", "token " + token)
+                    .get()
+                    .build();
 
-            try (Response response = client.newCall(request).execute()) {
-                if (response.isSuccessful() && response.body() != null) {
-                    JSONObject json = new JSONObject(response.body().string());
-                    org.json.JSONArray tree = json.getJSONArray("tree");
-                    for (int i = 0; i < tree.length(); i++) {
-                        JSONObject item = tree.getJSONObject(i);
-                        if (item.getString("type").equals("blob")) {
-                            files.add(item.getString("path"));
+                try (Response response = client.newCall(request).execute()) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        JSONObject json = new JSONObject(response.body().string());
+                        org.json.JSONArray tree = json.getJSONArray("tree");
+                        for (int i = 0; i < tree.length(); i++) {
+                            JSONObject item = tree.getJSONObject(i);
+                            if (item.getString("type").equals("blob")) {
+                                files.add(item.getString("path"));
+                            }
+                        }
+                        if (!files.isEmpty()) {
+                            return files; // Success, return files
                         }
                     }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+        
         return files;
     }
 }

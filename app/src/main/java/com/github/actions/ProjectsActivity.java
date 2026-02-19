@@ -471,6 +471,15 @@ public class ProjectsActivity extends AppCompatActivity {
             
             // Pull all files from repo
             java.util.List<String> files = api.getRepoTree();
+            
+            if (files.isEmpty()) {
+                dir.delete();
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "Repository is empty or couldn't fetch files", Toast.LENGTH_LONG).show();
+                });
+                return;
+            }
+            
             int cloned = 0;
             
             for (String filePath : files) {
@@ -493,9 +502,13 @@ public class ProjectsActivity extends AppCompatActivity {
             
             int finalCloned = cloned;
             runOnUiThread(() -> {
-                Toast.makeText(this, "✓ Cloned " + finalCloned + " files", Toast.LENGTH_SHORT).show();
-                loadProjects();
-                openProject(repo, path);
+                if (finalCloned > 0) {
+                    Toast.makeText(this, "✓ Cloned " + finalCloned + " files", Toast.LENGTH_SHORT).show();
+                    loadProjects();
+                    openProject(repo, path);
+                } else {
+                    Toast.makeText(this, "Failed to clone files", Toast.LENGTH_LONG).show();
+                }
             });
         }).start();
     }

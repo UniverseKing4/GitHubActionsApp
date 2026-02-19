@@ -1612,6 +1612,14 @@ public class IDEActivity extends AppCompatActivity {
             
             // Get all files from repo
             java.util.List<String> files = api.getRepoTree();
+            
+            if (files.isEmpty()) {
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "Repository is empty or couldn't fetch files", Toast.LENGTH_LONG).show();
+                });
+                return;
+            }
+            
             int pulled = 0;
             
             for (String filePath : files) {
@@ -1639,7 +1647,7 @@ public class IDEActivity extends AppCompatActivity {
                         openFile(currentFile);
                     }
                 } else {
-                    Toast.makeText(this, "No files to pull", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Failed to pull files", Toast.LENGTH_SHORT).show();
                 }
             });
         });
