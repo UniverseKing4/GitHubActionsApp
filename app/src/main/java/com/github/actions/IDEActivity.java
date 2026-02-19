@@ -1875,6 +1875,7 @@ public class IDEActivity extends AppCompatActivity {
                 currentFiles.add(filePath);
                 
                 long lastPushed = pushPrefs.getLong(filePath, 0);
+                String lastHash = pushPrefs.getString(filePath + "_hash", "");
                 
                 if (fileModified > lastPushed) {
                     try {
@@ -1884,10 +1885,18 @@ public class IDEActivity extends AppCompatActivity {
                         fis.close();
                         
                         String content = new String(data);
-                        String result = api.commitAndPush(filePath, content, message);
-                        if (result.contains("Success")) {
-                            pushPrefs.edit().putLong(filePath, fileModified).apply();
-                            success++;
+                        String currentHash = String.valueOf(content.hashCode());
+                        
+                        // Only push if content actually changed
+                        if (!currentHash.equals(lastHash)) {
+                            String result = api.commitAndPush(filePath, content, message);
+                            if (result.contains("Success")) {
+                                pushPrefs.edit()
+                                    .putLong(filePath, fileModified)
+                                    .putString(filePath + "_hash", currentHash)
+                                    .apply();
+                                success++;
+                            }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();

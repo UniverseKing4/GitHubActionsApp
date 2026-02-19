@@ -96,9 +96,7 @@ public class ProjectsActivity extends AppCompatActivity {
         projectsTitle.setText("Recent Projects");
         projectsTitle.setTextSize(20);
         projectsTitle.setPadding(0, 40, 0, 20);
-        if (isDark) {
-            projectsTitle.setTextColor(0xFFFFFFFF);
-        }
+        projectsTitle.setTextColor(isDark ? 0xFFFFFFFF : 0xFF000000);
         mainLayout.addView(projectsTitle);
         
         projectsList = new LinearLayout(this);
@@ -191,52 +189,44 @@ public class ProjectsActivity extends AppCompatActivity {
         
         String[] projectArray = projects.split(";");
         StringBuilder validProjects = new StringBuilder();
-        File gitCodeDir = new File(Environment.getExternalStorageDirectory(), "GitCode");
-        
-        // First, get all existing folders in GitCode directory
-        java.util.Map<String, String> existingFolders = new java.util.HashMap<>();
-        if (gitCodeDir.exists()) {
-            File[] allFolders = gitCodeDir.listFiles();
-            if (allFolders != null) {
-                for (File folder : allFolders) {
-                    if (folder.isDirectory()) {
-                        existingFolders.put(folder.getName(), folder.getAbsolutePath());
-                    }
-                }
-            }
-        }
-        
-        // Track which folders we've added
-        java.util.Set<String> addedFolders = new java.util.HashSet<>();
         
         for (String project : projectArray) {
             if (project.isEmpty()) continue;
             String[] parts = project.split("\\|");
             if (parts.length != 2) continue;
             
-            String name = parts[0];
-            String path = parts[1];
+            String savedName = parts[0];
+            String savedPath = parts[1];
             
-            File dir = new File(path);
+            File dir = new File(savedPath);
             
-            // If path doesn't exist, try to find folder by name
+            // If exact path doesn't exist, search parent directory for any folder
             if (!dir.exists()) {
-                if (existingFolders.containsKey(name)) {
-                    path = existingFolders.get(name);
-                    dir = new File(path);
-                } else {
-                    continue; // Skip if not found
+                File parentDir = new File(savedPath).getParentFile();
+                if (parentDir != null && parentDir.exists()) {
+                    // Look for ANY folder in the parent directory (could be renamed)
+                    File[] folders = parentDir.listFiles();
+                    if (folders != null) {
+                        // Try to find by saved name first
+                        for (File folder : folders) {
+                            if (folder.isDirectory() && folder.getName().equals(savedName)) {
+                                dir = folder;
+                                break;
+                            }
+                        }
+                        // If not found by name and there's only one folder, assume it's renamed
+                        if (!dir.exists() && folders.length == 1 && folders[0].isDirectory()) {
+                            dir = folders[0];
+                        }
+                    }
                 }
+                if (!dir.exists()) continue;
             }
             
-            // Get actual folder name and path
             String actualName = dir.getName();
             String actualPath = dir.getAbsolutePath();
             
-            if (!addedFolders.contains(actualName)) {
-                validProjects.append(actualName).append("|").append(actualPath).append(";");
-                addedFolders.add(actualName);
-            }
+            validProjects.append(actualName).append("|").append(actualPath).append(";");
             
             LinearLayout projectItem = new LinearLayout(this);
             projectItem.setOrientation(LinearLayout.HORIZONTAL);
