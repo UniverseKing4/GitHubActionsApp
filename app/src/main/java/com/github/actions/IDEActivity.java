@@ -75,9 +75,8 @@ public class IDEActivity extends AppCompatActivity {
         }
         
         drawerLayout = new DrawerLayout(this);
-        if (isDark) {
-            drawerLayout.setBackgroundColor(0xFF1E1E1E);
-        }
+        // Material 3 background
+        drawerLayout.setBackgroundColor(isDark ? 0xFF1C1B1F : 0xFFFEFBFF);
         
         // Main editor area
         LinearLayout mainLayout = new LinearLayout(this);
@@ -85,9 +84,8 @@ public class IDEActivity extends AppCompatActivity {
         mainLayout.setLayoutParams(new DrawerLayout.LayoutParams(
             DrawerLayout.LayoutParams.MATCH_PARENT,
             DrawerLayout.LayoutParams.MATCH_PARENT));
-        if (isDark) {
-            mainLayout.setBackgroundColor(0xFF1E1E1E);
-        }
+        // Material 3 background
+        mainLayout.setBackgroundColor(isDark ? 0xFF1C1B1F : 0xFFFEFBFF);
         
         // Tab bar with horizontal scrolling
         android.widget.HorizontalScrollView tabScroll = new android.widget.HorizontalScrollView(this);
@@ -161,9 +159,11 @@ public class IDEActivity extends AppCompatActivity {
         editor.setGravity(Gravity.TOP | Gravity.START);
         editor.setPadding(10, 20, 15, 20);
         editor.setHorizontallyScrolling(false);
-        editor.setBackgroundColor(isDark ? 0xFF1E1E1E : 0xFFFFFFFF);
-        editor.setTextColor(isDark ? 0xFFE0E0E0 : 0xFF000000);
-        editor.setHighlightColor(0x6633B5E5);
+        
+        // Material 3 editor colors
+        editor.setBackgroundColor(isDark ? 0xFF1C1B1F : 0xFFFEFBFF);
+        editor.setTextColor(isDark ? 0xFFE6E1E5 : 0xFF1C1B1F);
+        editor.setHighlightColor(isDark ? 0x40D0BCFF : 0x406750A4);
         editor.setVerticalScrollBarEnabled(false);
         
         // Tab key support and keyboard shortcuts
@@ -2315,7 +2315,11 @@ public class IDEActivity extends AppCompatActivity {
         btn.setMinWidth(0);
         btn.setMinimumWidth(0);
         btn.setOnClickListener(listener);
-        btn.setBackgroundColor(0x00000000);
+        
+        // Material 3 enhancement
+        com.github.actions.ui.UIEnhancer enhancer = new com.github.actions.ui.UIEnhancer(this);
+        enhancer.enhanceButton(btn, com.github.actions.ui.UIEnhancer.ButtonStyle.TEXT);
+        
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -2474,11 +2478,13 @@ public class IDEActivity extends AppCompatActivity {
             android.text.SpannableString spannable = new android.text.SpannableString(content);
             
             String[] keywords = getKeywordsForExtension(ext);
-            int keywordColor = isDark ? 0xFFFF79C6 : 0xFF0000FF;  // Pink/Blue
-            int stringColor = isDark ? 0xFF50FA7B : 0xFF008000;   // Green
-            int commentColor = isDark ? 0xFF6272A4 : 0xFF808080;  // Gray
-            int numberColor = isDark ? 0xFFBD93F9 : 0xFFFF6600;   // Purple/Orange
-            int functionColor = isDark ? 0xFF8BE9FD : 0xFF0080FF; // Cyan/Blue
+            
+            // Material 3 syntax colors
+            int keywordColor = isDark ? com.github.actions.ui.M3SyntaxColors.Dark.KEYWORD : com.github.actions.ui.M3SyntaxColors.Light.KEYWORD;
+            int stringColor = isDark ? com.github.actions.ui.M3SyntaxColors.Dark.STRING : com.github.actions.ui.M3SyntaxColors.Light.STRING;
+            int commentColor = isDark ? com.github.actions.ui.M3SyntaxColors.Dark.COMMENT : com.github.actions.ui.M3SyntaxColors.Light.COMMENT;
+            int numberColor = isDark ? com.github.actions.ui.M3SyntaxColors.Dark.NUMBER : com.github.actions.ui.M3SyntaxColors.Light.NUMBER;
+            int functionColor = isDark ? com.github.actions.ui.M3SyntaxColors.Dark.FUNCTION : com.github.actions.ui.M3SyntaxColors.Light.FUNCTION;
             
             // Highlight keywords
             for (String keyword : keywords) {

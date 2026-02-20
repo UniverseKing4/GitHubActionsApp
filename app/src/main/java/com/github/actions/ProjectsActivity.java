@@ -42,9 +42,8 @@ public class ProjectsActivity extends AppCompatActivity {
         LinearLayout mainLayout = new LinearLayout(this);
         mainLayout.setOrientation(LinearLayout.VERTICAL);
         mainLayout.setPadding(20, 20, 20, 20);
-        if (isDark) {
-            mainLayout.setBackgroundColor(0xFF1E1E1E);
-        }
+        // Material 3 background
+        mainLayout.setBackgroundColor(isDark ? 0xFF1C1B1F : 0xFFFEFBFF);
         
         TextView title = new TextView(this);
         title.setText("GitCode");
@@ -92,6 +91,15 @@ public class ProjectsActivity extends AppCompatActivity {
         btnSettings.setOnClickListener(v -> showSettings());
         mainLayout.addView(btnSettings);
         
+        // Apply Material 3 enhancements
+        com.github.actions.ui.UIEnhancer enhancer = new com.github.actions.ui.UIEnhancer(this);
+        enhancer.enhanceButton(btnNew, com.github.actions.ui.UIEnhancer.ButtonStyle.FILLED);
+        enhancer.enhanceButton(btnClone, com.github.actions.ui.UIEnhancer.ButtonStyle.FILLED);
+        enhancer.enhanceButton(btnProfiles, com.github.actions.ui.UIEnhancer.ButtonStyle.TONAL);
+        enhancer.enhanceButton(btnSettings, com.github.actions.ui.UIEnhancer.ButtonStyle.TONAL);
+        enhancer.enhanceTextView(title, com.github.actions.ui.UIEnhancer.TextStyle.HEADLINE_LARGE);
+        enhancer.applyToActivity(this);
+        
         TextView projectsTitle = new TextView(this);
         projectsTitle.setText("Projects");
         projectsTitle.setTextSize(20);
@@ -104,9 +112,8 @@ public class ProjectsActivity extends AppCompatActivity {
         mainLayout.addView(projectsList);
         
         ScrollView scrollView = new ScrollView(this);
-        if (isDark) {
-            scrollView.setBackgroundColor(0xFF1E1E1E);
-        }
+        // Material 3 background
+        scrollView.setBackgroundColor(isDark ? 0xFF1C1B1F : 0xFFFEFBFF);
         scrollView.addView(mainLayout);
         setContentView(scrollView);
         
