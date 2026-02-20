@@ -209,10 +209,14 @@ public class IDEActivity extends AppCompatActivity {
         
         // Syntax highlighting setup
         syntaxRunnable = () -> {
-            if (currentFile != null && !isLargeFile) {
+            if (currentFile != null) {
                 String currentText = editor.getText().toString();
                 if (!currentText.equals(lastHighlightedText)) {
-                    applySyntaxHighlighting(currentFile.getName(), currentText);
+                    if (isLargeFile) {
+                        applySyntaxHighlightingForLargeFile();
+                    } else {
+                        applySyntaxHighlighting(currentFile.getName(), currentText);
+                    }
                     lastHighlightedText = currentText;
                 }
             }
@@ -1650,48 +1654,52 @@ public class IDEActivity extends AppCompatActivity {
     }
     
     private void setupLoadButtonClicks() {
-        editor.setOnClickListener(v -> {
-            if (!isLargeFile) return;
-            
-            String text = editor.getText().toString();
-            int cursorPos = editor.getSelectionStart();
-            
-            // Check if clicked on "Load Previous" button (first 50 chars)
-            if (cursorPos < 50 && text.startsWith("▲▲▲")) {
-                updateFullContentFromChunk();
-                int prevChunkStart = Math.max(0, currentChunkStart - CHUNK_SIZE);
-                loadChunkWithButtons(prevChunkStart);
-                return; // Don't let cursor move to button
-            }
-            // Check if clicked on "Load Next" button (last 50 chars)
-            else if (cursorPos > text.length() - 50 && text.endsWith("▼▼▼")) {
-                updateFullContentFromChunk();
-                int nextChunkStart = currentChunkStart + CHUNK_SIZE;
-                if (nextChunkStart < fullFileContent.length()) {
-                    loadChunkWithButtons(nextChunkStart);
-                }
-                return; // Don't let cursor move to button
-            }
-        });
-        
-        // Prevent cursor from being placed in button areas
         editor.setOnTouchListener((v, event) -> {
             if (!isLargeFile) return false;
             
-            if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
+            if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                // Get touch position
+                int offset = editor.getOffsetForPosition(event.getX(), event.getY());
                 String text = editor.getText().toString();
-                int cursorPos = editor.getSelectionStart();
                 
-                // If cursor in button area, move it to safe zone
-                if (cursorPos < 50 && text.startsWith("▲▲▲")) {
-                    editor.setSelection(Math.min(50, text.length()));
-                    return true;
-                } else if (cursorPos > text.length() - 50 && text.endsWith("▼▼▼")) {
-                    editor.setSelection(Math.max(0, text.length() - 50));
-                    return true;
+                // Find button boundaries
+                int prevButtonEnd = 0;
+                int nextButtonStart = text.length();
+                
+                if (text.startsWith("▲▲▲")) {
+                    int firstNewline = text.indexOf("\n\n");
+                    if (firstNewline > 0) {
+                        prevButtonEnd = firstNewline + 2;
+                    }
+                }
+                
+                if (text.endsWith("▼▼▼")) {
+                    int lastNewline = text.lastIndexOf("\n\n▼▼▼");
+                    if (lastNewline > 0) {
+                        nextButtonStart = lastNewline;
+                    }
+                }
+                
+                // Check if clicked on Previous button
+                if (offset < prevButtonEnd && prevButtonEnd > 0) {
+                    updateFullContentFromChunk();
+                    int prevChunkStart = Math.max(0, currentChunkStart - CHUNK_SIZE);
+                    loadChunkWithButtons(prevChunkStart);
+                    return true; // Consume event
+                }
+                
+                // Check if clicked on Next button
+                if (offset >= nextButtonStart && nextButtonStart < text.length()) {
+                    updateFullContentFromChunk();
+                    int nextChunkStart = currentChunkStart + CHUNK_SIZE;
+                    if (nextChunkStart < fullFileContent.length()) {
+                        loadChunkWithButtons(nextChunkStart);
+                    }
+                    return true; // Consume event
                 }
             }
-            return false;
+            
+            return false; // Let normal editing happen
         });
     }
     
@@ -1847,6 +1855,121 @@ public class IDEActivity extends AppCompatActivity {
         toolbar.addView(btn);
     }
 
+    
+    private void applySyntaxHighlightingForLargeFile() {
+        if (currentFile == null) return;
+        
+        String text = editor.getText().toString();
+        
+        // Find button boundaries
+        int codeStart = 0;
+        int codeEnd = text.length();
+        
+        if (text.startsWith("▲▲▲")) {
+            int endOfPrevButton = text.indexOf("\n\n");
+            if (endOfPrevButton > 0) {
+                codeStart = endOfPrevButton + 2;
+            }
+        }
+        
+        if (text.endsWith("▼▼▼")) {
+            int startOfNextButton = text.lastIndexOf("\n\n▼▼▼");
+            if (startOfNextButton > 0) {
+                codeEnd = startOfNextButton;
+            }
+        }
+        
+        // Extract code content
+        String codeContent = text.substring(codeStart, codeEnd);
+        
+        // Apply syntax highlighting to code content
+        android.text.Spannable spannable = new android.text.SpannableStringBuilder(text);
+        applySyntaxHighlightingToSpannable(currentFile.getName(), codeContent, spannable, codeStart);
+        
+        // Set the highlighted text
+        int cursorPos = editor.getSelectionStart();
+        editor.setText(spannable);
+        
+        // Restore cursor position
+        if (cursorPos >= 0 && cursorPos <= spannable.length()) {
+            editor.setSelection(Math.min(cursorPos, spannable.length()));
+        }
+    }
+    
+    private void applySyntaxHighlightingToSpannable(String fileName, String content, android.text.Spannable spannable, int offset) {
+        if (content == null || content.isEmpty()) return;
+        
+        SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
+        boolean isDark = themePrefs.getBoolean("darkMode", false);
+        
+        String ext = "";
+        int i = fileName.lastIndexOf('.');
+        if (i > 0) {
+            ext = fileName.substring(i + 1).toLowerCase();
+        }
+        
+        // Only apply syntax highlighting for code files
+        String[] codeExtensions = {"java", "js", "jsx", "ts", "tsx", "py", "html", "xml", "css", "scss", "sass", 
+                                    "c", "cpp", "h", "hpp", "go", "rs", "php", "rb", "swift", "kt", "json", "yaml", "yml"};
+        boolean isCodeFile = false;
+        for (String codeExt : codeExtensions) {
+            if (ext.equals(codeExt)) {
+                isCodeFile = true;
+                break;
+            }
+        }
+        
+        if (!isCodeFile) return;
+        
+        try {
+            String[] keywords = getKeywordsForExtension(ext);
+            int keywordColor = isDark ? 0xFFFF79C6 : 0xFF0000FF;
+            int stringColor = isDark ? 0xFF50FA7B : 0xFF008000;
+            int commentColor = isDark ? 0xFF6272A4 : 0xFF808080;
+            int numberColor = isDark ? 0xFFBD93F9 : 0xFFFF6600;
+            int functionColor = isDark ? 0xFF8BE9FD : 0xFF0080FF;
+            
+            // Highlight keywords
+            for (String keyword : keywords) {
+                int start = 0;
+                while ((start = content.indexOf(keyword, start)) != -1) {
+                    if ((start == 0 || !Character.isLetterOrDigit(content.charAt(start - 1))) &&
+                        (start + keyword.length() >= content.length() || !Character.isLetterOrDigit(content.charAt(start + keyword.length())))) {
+                        spannable.setSpan(new android.text.style.ForegroundColorSpan(keywordColor),
+                            offset + start, offset + start + keyword.length(),
+                            android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }
+                    start += keyword.length();
+                }
+            }
+            
+            highlightPatternWithOffset(spannable, content, "\\b\\d+\\.?\\d*\\b", numberColor, offset);
+            highlightPatternWithOffset(spannable, content, "\\b\\w+(?=\\()", functionColor, offset);
+            highlightPatternWithOffset(spannable, content, "\"[^\"]*\"", stringColor, offset);
+            highlightPatternWithOffset(spannable, content, "'[^']*'", stringColor, offset);
+            highlightPatternWithOffset(spannable, content, "`[^`]*`", stringColor, offset);
+            highlightPatternWithOffset(spannable, content, "//.*", commentColor, offset);
+            highlightPatternWithOffset(spannable, content, "#.*", commentColor, offset);
+            highlightPatternWithOffset(spannable, content, "/\\*.*?\\*/", commentColor, offset);
+        } catch (Exception e) {
+            // Skip if highlighting fails
+        }
+    }
+    
+    private void highlightPatternWithOffset(android.text.Spannable spannable, String content, String regex, int color, int offset) {
+        try {
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
+            java.util.regex.Matcher matcher = pattern.matcher(content);
+            while (matcher.find()) {
+                spannable.setSpan(new android.text.style.ForegroundColorSpan(color),
+                    offset + matcher.start(), offset + matcher.end(),
+                    android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        } catch (Exception e) {
+            // Skip if pattern fails
+        }
+    }
+    
     private void applySyntaxHighlighting(String fileName, String content) {
         if (content == null || content.isEmpty()) {
             editor.setText("");
