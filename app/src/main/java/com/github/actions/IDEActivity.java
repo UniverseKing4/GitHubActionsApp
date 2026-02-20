@@ -1865,6 +1865,54 @@ public class IDEActivity extends AppCompatActivity {
             });
         });
         
+        // Periodic check - runs every 50ms to catch any cursor movement
+        final android.os.Handler periodicHandler = new android.os.Handler();
+        final Runnable periodicCheck = new Runnable() {
+            @Override
+            public void run() {
+                if (!isLargeFile) {
+                    periodicHandler.postDelayed(this, 50);
+                    return;
+                }
+                
+                String text = editor.getText().toString();
+                int cursor = editor.getSelectionStart();
+                
+                int protectedLine1Start = -1, protectedLine1End = -1;
+                int protectedLine2Start = -1, protectedLine2End = -1;
+                
+                if (text.startsWith("▲▲▲")) {
+                    int firstNewline = text.indexOf("\n");
+                    if (firstNewline > 0) {
+                        protectedLine1Start = firstNewline + 1;
+                        int secondNewline = text.indexOf("\n", firstNewline + 1);
+                        if (secondNewline > 0) {
+                            protectedLine1End = secondNewline + 1;
+                        }
+                    }
+                }
+                
+                if (text.endsWith("▼▼▼")) {
+                    int buttonStart = text.lastIndexOf("\n\n▼▼▼");
+                    if (buttonStart > 0) {
+                        protectedLine2Start = buttonStart + 1;
+                        protectedLine2End = buttonStart + 2;
+                    }
+                }
+                
+                // Move cursor instantly if in protected zone
+                if (protectedLine1Start >= 0 && cursor >= protectedLine1Start && cursor < protectedLine1End) {
+                    editor.setSelection(Math.min(protectedLine1End, text.length()));
+                } else if (protectedLine2Start >= 0 && cursor >= protectedLine2Start && cursor < protectedLine2End) {
+                    editor.setSelection(Math.max(0, protectedLine2Start - 1));
+                }
+                
+                // Schedule next check
+                periodicHandler.postDelayed(this, 50);
+            }
+        };
+        periodicHandler.post(periodicCheck);
+        
         // Also monitor with TextWatcher for keyboard navigation
         editor.addTextChangedListener(new android.text.TextWatcher() {
             private boolean isMoving = false;
