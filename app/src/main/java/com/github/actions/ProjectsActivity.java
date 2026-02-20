@@ -455,19 +455,6 @@ public class ProjectsActivity extends AppCompatActivity {
         });
         
         dialog.show();
-        
-        // Apply text colors AFTER showing
-        if (isDark && dialog.getWindow() != null) {
-            new android.os.Handler().post(() -> {
-                try {
-                    android.view.ViewGroup root = (android.view.ViewGroup) dialog.getWindow().getDecorView();
-                    applyDarkTheme(root);
-                    
-                    android.widget.Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-                    if (negativeButton != null) negativeButton.setTextColor(0xFFFFFFFF);
-                } catch (Exception e) {}
-            });
-        }
     }
 
     private void addProfile() {
@@ -636,7 +623,7 @@ public class ProjectsActivity extends AppCompatActivity {
     }
 
     private void showSettings() {
-        AlertDialog.Builder builder = new com.github.actions.ui.M3DialogBuilder(this);
+        com.github.actions.ui.M3DialogBuilder builder = new com.github.actions.ui.M3DialogBuilder(this);
         builder.setTitle("App Settings");
         
         LinearLayout layout = new LinearLayout(this);
@@ -703,24 +690,5 @@ public class ProjectsActivity extends AppCompatActivity {
         }
         
         dialog.show();
-        
-        // Apply text colors after showing
-        if (isDark && dialog.getWindow() != null) {
-            new android.os.Handler().post(() -> {
-                try {
-                    android.view.ViewGroup root = (android.view.ViewGroup) dialog.getWindow().getDecorView();
-                    applyDarkTheme(root);
-                    
-                    // Make dialog button text white
-                    android.widget.Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-                    android.widget.Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-                    
-                    if (positiveButton != null) positiveButton.setTextColor(0xFFFFFFFF);
-                    if (negativeButton != null) negativeButton.setTextColor(0xFFFFFFFF);
-                } catch (Exception e) {
-                    // Ignore
-                }
-            });
-        }
     }
 }

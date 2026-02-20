@@ -61,6 +61,11 @@ public class M3DialogBuilder {
         return this;
     }
     
+    public M3DialogBuilder setItems(CharSequence[] items, DialogInterface.OnClickListener listener) {
+        builder.setItems(items, listener);
+        return this;
+    }
+    
     public AlertDialog create() {
         AlertDialog dialog = builder.create();
         applyMaterial3Styling(dialog);
