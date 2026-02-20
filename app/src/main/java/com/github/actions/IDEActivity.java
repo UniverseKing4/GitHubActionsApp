@@ -504,7 +504,8 @@ public class IDEActivity extends AppCompatActivity {
             // Create title with project name
             TextView titleView = new TextView(this);
             titleView.setText(projectName);
-            titleView.setTextColor(isDark ? 0xFFFFFFFF : 0xFF000000);
+            // Material 3 onSurface color
+            titleView.setTextColor(isDark ? 0xFFE6E1E5 : 0xFF1C1B1F);
             titleView.setTextSize(14);
             titleView.setPadding(10, 0, 10, 0);
             titleView.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
