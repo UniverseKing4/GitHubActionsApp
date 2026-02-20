@@ -1878,12 +1878,16 @@ public class IDEActivity extends AppCompatActivity {
                 String text = editor.getText().toString();
                 int cursor = editor.getSelectionStart();
                 
-                int protectedLine1Start = -1, protectedLine1End = -1;
-                int protectedLine2Start = -1, protectedLine2End = -1;
+                int prevButtonStart = -1, prevButtonEnd = -1; // ▲▲▲ line
+                int protectedLine1Start = -1, protectedLine1End = -1; // Empty line after ▲▲▲
+                int nextButtonStart = -1, nextButtonEnd = -1; // ▼▼▼ line
+                int protectedLine2Start = -1, protectedLine2End = -1; // Empty line before ▼▼▼
                 
                 if (text.startsWith("▲▲▲")) {
+                    prevButtonStart = 0;
                     int firstNewline = text.indexOf("\n");
                     if (firstNewline > 0) {
+                        prevButtonEnd = firstNewline + 1;
                         protectedLine1Start = firstNewline + 1;
                         int secondNewline = text.indexOf("\n", firstNewline + 1);
                         if (secondNewline > 0) {
@@ -1897,13 +1901,23 @@ public class IDEActivity extends AppCompatActivity {
                     if (buttonStart > 0) {
                         protectedLine2Start = buttonStart + 1;
                         protectedLine2End = buttonStart + 2;
+                        nextButtonStart = buttonStart + 2;
+                        nextButtonEnd = text.length();
                     }
                 }
                 
-                // Move cursor instantly if in protected zone
-                if (protectedLine1Start >= 0 && cursor >= protectedLine1Start && cursor < protectedLine1End) {
+                // Move cursor instantly if in ANY protected zone
+                if (prevButtonStart >= 0 && cursor >= prevButtonStart && cursor < prevButtonEnd) {
+                    // On ▲▲▲ line - move to first code line
+                    editor.setSelection(Math.min(prevButtonEnd + 1, text.length()));
+                } else if (protectedLine1Start >= 0 && cursor >= protectedLine1Start && cursor < protectedLine1End) {
+                    // On empty line after ▲▲▲ - move to first code line
                     editor.setSelection(Math.min(protectedLine1End, text.length()));
                 } else if (protectedLine2Start >= 0 && cursor >= protectedLine2Start && cursor < protectedLine2End) {
+                    // On empty line before ▼▼▼ - move to last code line
+                    editor.setSelection(Math.max(0, protectedLine2Start - 1));
+                } else if (nextButtonStart >= 0 && cursor >= nextButtonStart && cursor <= nextButtonEnd) {
+                    // On ▼▼▼ line - move to last code line
                     editor.setSelection(Math.max(0, protectedLine2Start - 1));
                 }
                 
