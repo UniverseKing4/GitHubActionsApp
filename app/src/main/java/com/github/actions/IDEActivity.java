@@ -497,9 +497,11 @@ public class IDEActivity extends AppCompatActivity {
         setContentView(drawerLayout);
         
         if (getSupportActionBar() != null) {
-            if (isDark) {
-                getSupportActionBar().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF211F26));
-            }
+            // Material 3 action bar styling
+            android.graphics.drawable.GradientDrawable actionBarBg = new android.graphics.drawable.GradientDrawable();
+            actionBarBg.setColor(isDark ? 0xFF211F26 : 0xFFF3EDF7);
+            getSupportActionBar().setBackgroundDrawable(actionBarBg);
+            getSupportActionBar().setElevation(0);
             
             // Create title with project name
             TextView titleView = new TextView(this);
@@ -617,17 +619,33 @@ public class IDEActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, 1, 0, "Find");
-        menu.add(0, 2, 0, "Replace");
-        menu.add(0, 3, 0, "Go to Line");
-        menu.add(0, 6, 0, "Delete Line");
-        menu.add(0, 5, 0, "Duplicate Line");
-        menu.add(0, 4, 0, "Select All");
-        menu.add(0, 7, 0, "Word Wrap: ON");
-        menu.add(0, 8, 0, "⬇ Pull from GitHub");
+        menu.add(0, 1, 0, "🔍 Find");
+        menu.add(0, 2, 0, "🔄 Replace");
+        menu.add(0, 3, 0, "➡️ Go to Line");
+        menu.add(0, 6, 0, "🗑️ Delete Line");
+        menu.add(0, 5, 0, "📋 Duplicate Line");
+        menu.add(0, 4, 0, "✅ Select All");
+        menu.add(0, 7, 0, "📝 Word Wrap: ON");
+        menu.add(0, 8, 0, "⬇️ Pull from GitHub");
         menu.add(0, 9, 0, "📊 Project Statistics");
-        menu.add(0, 10, 0, "⚙ Settings");
+        menu.add(0, 10, 0, "⚙️ Settings");
         return true;
+    }
+    
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
+        boolean isDark = themePrefs.getBoolean("darkMode", true);
+        
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem item = menu.getItem(i);
+            android.text.SpannableString spanString = new android.text.SpannableString(item.getTitle());
+            spanString.setSpan(new android.text.style.ForegroundColorSpan(
+                isDark ? 0xFFE6E1E5 : 0xFF1C1B1F), 0, spanString.length(), 0);
+            item.setTitle(spanString);
+        }
+        
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
