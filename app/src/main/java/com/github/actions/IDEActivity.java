@@ -1660,11 +1660,13 @@ public class IDEActivity extends AppCompatActivity {
             
             StringBuilder sb = new StringBuilder();
             
-            // Add empty line for "Load Previous" button if present
-            // The button text is: "▲▲▲ TAP TO LOAD PREVIOUS (X/Y) ▲▲▲\n\n"
-            // This creates 1 line for button text + 2 newlines = 3 lines total
+            // Add empty lines for "Load Previous" button if present
+            // Button format: "▲▲▲ TAP TO LOAD PREVIOUS (X/Y) ▲▲▲\n\n"
+            // Line 1: button text (no line number)
+            // Line 2: empty (no line number)
+            // Line 3: code starts (line number appears here)
             if (startPos > 0) {
-                sb.append("\n\n\n");
+                sb.append("\n\n");
             }
             
             // Add line numbers starting from correct position
@@ -1674,10 +1676,12 @@ public class IDEActivity extends AppCompatActivity {
             }
             
             // Add empty lines for "Load Next" button if present
-            // The button text is: "\n\n▼▼▼ TAP TO LOAD NEXT (X/Y) ▼▼▼"
-            // This creates 2 newlines + 1 line for button text = 3 lines total
+            // Button format: "\n\n▼▼▼ TAP TO LOAD NEXT (X/Y) ▼▼▼"
+            // Line 1: empty (no line number)
+            // Line 2: empty (no line number)
+            // Line 3: button text (no line number)
             if (startPos + CHUNK_SIZE < fullFileContent.length()) {
-                sb.append("\n\n\n");
+                sb.append("\n\n");
             }
             
             String lineNumberText = sb.toString();
