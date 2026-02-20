@@ -697,8 +697,8 @@ public class IDEActivity extends AppCompatActivity {
             ((EditText) view).setTextColor(0xFFFFFFFF);
             ((EditText) view).setHintTextColor(0xFF888888);
         } else if (view instanceof android.widget.Button) {
-            // Keep button text black for visibility
-            ((android.widget.Button) view).setTextColor(0xFF000000);
+            // Make button text WHITE in dark mode
+            ((android.widget.Button) view).setTextColor(0xFFFFFFFF);
         } else if (view instanceof TextView) {
             ((TextView) view).setTextColor(0xFFFFFFFF);
         }
@@ -1297,6 +1297,8 @@ public class IDEActivity extends AppCompatActivity {
                 btnMenu.setText("⋮");
                 btnMenu.setTextSize(22);
                 btnMenu.setPadding(20, 0, 15, 0);
+                // Material 3 color
+                btnMenu.setTextColor(isDark ? 0xFFCAC4D0 : 0xFF49454F);
                 btnMenu.setOnClickListener(v -> showFolderMenu(file));
                 rowLayout.addView(btnMenu);
             }
@@ -1332,6 +1334,8 @@ public class IDEActivity extends AppCompatActivity {
                 btnMenu.setText("⋮");
                 btnMenu.setTextSize(22);
                 btnMenu.setPadding(20, 0, 15, 0);
+                // Material 3 color
+                btnMenu.setTextColor(isDark ? 0xFFCAC4D0 : 0xFF49454F);
                 btnMenu.setOnClickListener(v -> showFileMenu(file));
                 rowLayout.addView(btnMenu);
             }
