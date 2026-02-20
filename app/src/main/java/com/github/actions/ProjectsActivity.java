@@ -741,6 +741,13 @@ public class ProjectsActivity extends AppCompatActivity {
                 try {
                     android.view.ViewGroup root = (android.view.ViewGroup) dialog.getWindow().getDecorView();
                     applyDarkTheme(root);
+                    
+                    // Make dialog button text white
+                    android.widget.Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                    android.widget.Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+                    
+                    if (positiveButton != null) positiveButton.setTextColor(0xFFFFFFFF);
+                    if (negativeButton != null) negativeButton.setTextColor(0xFFFFFFFF);
                 } catch (Exception e) {
                     // Ignore
                 }
