@@ -1575,7 +1575,6 @@ public class IDEActivity extends AppCompatActivity {
             }
             
             long fileSize = file.length();
-            isLargeFile = fileSize > 100000; // 100KB threshold
             
             FileInputStream fis = new FileInputStream(file);
             byte[] data = new byte[(int) fileSize];
@@ -1584,6 +1583,10 @@ public class IDEActivity extends AppCompatActivity {
             
             currentFile = file;
             String content = new String(data);
+            
+            // Check if large file: >10KB OR 1000+ lines
+            int lineCount = content.split("\n", -1).length;
+            isLargeFile = fileSize > 10000 || lineCount >= 1000;
             
             undoStack.clear();
             redoStack.clear();
@@ -1711,30 +1714,39 @@ public class IDEActivity extends AppCompatActivity {
                 // Find button boundaries more precisely
                 int prevButtonStart = 0;
                 int prevButtonEnd = 0;
+                int prevButtonTotalEnd = 0; // Including the 2 empty lines
+                int nextButtonTotalStart = text.length(); // Including the 2 empty lines before button
                 int nextButtonStart = text.length();
                 int nextButtonEnd = text.length();
                 
                 // Previous button: "▲▲▲ TAP TO LOAD PREVIOUS (X/Y) ▲▲▲\n\n"
-                // Only the first line with ▲▲▲ should be clickable
+                // Line 1: button text (clickable)
+                // Line 2-3: empty lines (not editable)
                 if (text.startsWith("▲▲▲")) {
                     prevButtonStart = 0;
                     int firstNewline = text.indexOf("\n");
                     if (firstNewline > 0) {
                         prevButtonEnd = firstNewline; // Only first line is clickable
+                        int doubleNewline = text.indexOf("\n\n");
+                        if (doubleNewline > 0) {
+                            prevButtonTotalEnd = doubleNewline + 2; // Total button area including empty lines
+                        }
                     }
                 }
                 
                 // Next button: "\n\n▼▼▼ TAP TO LOAD NEXT (X/Y) ▼▼▼"
-                // Only the line with ▼▼▼ should be clickable, not the 2 empty lines before it
+                // Line 1-2: empty lines (not editable)
+                // Line 3: button text (clickable)
                 if (text.endsWith("▼▼▼")) {
                     int buttonTextStart = text.lastIndexOf("\n\n▼▼▼");
                     if (buttonTextStart > 0) {
+                        nextButtonTotalStart = buttonTextStart; // Start of empty lines
                         nextButtonStart = buttonTextStart + 2; // Skip the 2 newlines
                         nextButtonEnd = text.length();
                     }
                 }
                 
-                // Check if clicked on Previous button (only first line)
+                // Check if clicked on Previous button text (only first line)
                 if (offset >= prevButtonStart && offset < prevButtonEnd && prevButtonEnd > 0) {
                     updateFullContentFromChunk();
                     int prevChunkStart = Math.max(0, currentChunkStart - CHUNK_SIZE);
@@ -1742,7 +1754,7 @@ public class IDEActivity extends AppCompatActivity {
                     return true; // Consume event
                 }
                 
-                // Check if clicked on Next button (only the line with ▼▼▼)
+                // Check if clicked on Next button text (only the line with ▼▼▼)
                 if (offset >= nextButtonStart && offset <= nextButtonEnd && nextButtonStart < text.length()) {
                     updateFullContentFromChunk();
                     int nextChunkStart = currentChunkStart + CHUNK_SIZE;
@@ -1750,6 +1762,16 @@ public class IDEActivity extends AppCompatActivity {
                         loadChunkWithButtons(nextChunkStart);
                     }
                     return true; // Consume event
+                }
+                
+                // Prevent cursor placement on empty lines (line 2-3 of prev button)
+                if (offset >= prevButtonEnd && offset < prevButtonTotalEnd && prevButtonTotalEnd > 0) {
+                    return true; // Consume event, don't allow cursor here
+                }
+                
+                // Prevent cursor placement on empty lines (line 1-2 of next button)
+                if (offset >= nextButtonTotalStart && offset < nextButtonStart && nextButtonTotalStart < text.length()) {
+                    return true; // Consume event, don't allow cursor here
                 }
             }
             
