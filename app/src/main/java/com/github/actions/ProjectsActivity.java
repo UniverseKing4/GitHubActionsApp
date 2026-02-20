@@ -655,7 +655,7 @@ public class ProjectsActivity extends AppCompatActivity {
     }
 
     private void showSettings() {
-        AlertDialog.Builder builder = createThemedDialog();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("App Settings");
         
         LinearLayout layout = new LinearLayout(this);
@@ -707,7 +707,7 @@ public class ProjectsActivity extends AppCompatActivity {
         });
         builder.setNegativeButton("Cancel", null);
         
-        AlertDialog dialog = showThemedDialog(builder);
+        AlertDialog dialog = builder.create();
         
         btnDarkMode.setOnClickListener(v -> {
             boolean currentDark = themePrefs.getBoolean("darkMode", false);
@@ -715,5 +715,24 @@ public class ProjectsActivity extends AppCompatActivity {
             dialog.dismiss();
             recreate();
         });
+        
+        // Apply dark mode styling if enabled
+        if (isDark && dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF2D2D2D));
+        }
+        
+        dialog.show();
+        
+        // Apply text colors after showing
+        if (isDark && dialog.getWindow() != null) {
+            new android.os.Handler().post(() -> {
+                try {
+                    android.view.ViewGroup root = (android.view.ViewGroup) dialog.getWindow().getDecorView();
+                    applyDarkTheme(root);
+                } catch (Exception e) {
+                    // Ignore
+                }
+            });
+        }
     }
 }
