@@ -125,7 +125,7 @@ public class ProjectsActivity extends AppCompatActivity {
         
         // Apply dark theme BEFORE showing to prevent flash
         if (isDark && dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF2D2D2D));
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF211F26));
         }
         
         dialog.show();
@@ -445,7 +445,7 @@ public class ProjectsActivity extends AppCompatActivity {
         
         // Apply dark background BEFORE showing
         if (isDark && dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF2D2D2D));
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF211F26));
         }
         
         // Set click listeners after dialog is created
@@ -751,7 +751,7 @@ public class ProjectsActivity extends AppCompatActivity {
         
         // Apply dark mode styling if enabled
         if (isDark && dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF2D2D2D));
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF211F26));
         }
         
         dialog.show();
