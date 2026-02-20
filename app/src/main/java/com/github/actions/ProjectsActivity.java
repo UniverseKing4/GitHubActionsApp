@@ -56,7 +56,8 @@ public class ProjectsActivity extends AppCompatActivity {
         underline.setLayoutParams(new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             (int)(2 * getResources().getDisplayMetrics().density)));
-        underline.setBackgroundColor(isDark ? 0xFFFFFFFF : 0xFF000000);
+        // Material 3 primary color for underline
+        underline.setBackgroundColor(isDark ? 0xFFD0BCFF : 0xFF6750A4);
         title.post(() -> {
             android.graphics.Paint paint = title.getPaint();
             int textWidth = (int) paint.measureText("GitCode");
@@ -104,7 +105,8 @@ public class ProjectsActivity extends AppCompatActivity {
         projectsTitle.setText("Projects");
         projectsTitle.setTextSize(20);
         projectsTitle.setPadding(0, 40, 0, 20);
-        projectsTitle.setTextColor(isDark ? 0xFFFFFFFF : 0xFF000000);
+        // Material 3 onSurface color
+        projectsTitle.setTextColor(isDark ? 0xFFE6E1E5 : 0xFF1C1B1F);
         mainLayout.addView(projectsTitle);
         
         projectsList = new LinearLayout(this);
@@ -405,7 +407,7 @@ public class ProjectsActivity extends AppCompatActivity {
         
         // Apply dark background BEFORE showing
         if (isDark && dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF2D2D2D));
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF211F26));
         }
         
         // Set click listeners after dialog is created
@@ -698,7 +700,7 @@ public class ProjectsActivity extends AppCompatActivity {
         
         // Apply dark mode styling if enabled
         if (isDark && dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF2D2D2D));
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF211F26));
         }
         
         dialog.show();

@@ -96,7 +96,8 @@ public class IDEActivity extends AppCompatActivity {
         
         tabBar = new LinearLayout(this);
         tabBar.setOrientation(LinearLayout.HORIZONTAL);
-        tabBar.setBackgroundColor(isDark ? 0xFF2D2D2D : 0xFFE0E0E0);
+        // Material 3 surface variant
+        tabBar.setBackgroundColor(isDark ? 0xFF49454F : 0xFFE7E0EC);
         tabBar.setPadding(5, 5, 5, 5);
         tabScroll.addView(tabBar);
         mainLayout.addView(tabScroll);
@@ -108,7 +109,7 @@ public class IDEActivity extends AppCompatActivity {
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.MATCH_PARENT));
         if (isDark) {
-            editorContainer.setBackgroundColor(0xFF1E1E1E);
+            editorContainer.setBackgroundColor(0xFF1C1B1F);
         }
         
         // Line numbers - start with minimal width
@@ -428,7 +429,7 @@ public class IDEActivity extends AppCompatActivity {
         // File drawer
         LinearLayout drawer = new LinearLayout(this);
         drawer.setOrientation(LinearLayout.VERTICAL);
-        drawer.setBackgroundColor(isDark ? 0xFF2D2D2D : 0xFFF5F5F5);
+        drawer.setBackgroundColor(isDark ? 0xFF211F26 : 0xFFF3EDF7);
         drawer.setLayoutParams(new DrawerLayout.LayoutParams(
             (int)(300 * getResources().getDisplayMetrics().density),
             DrawerLayout.LayoutParams.MATCH_PARENT,
@@ -497,7 +498,7 @@ public class IDEActivity extends AppCompatActivity {
         
         if (getSupportActionBar() != null) {
             if (isDark) {
-                getSupportActionBar().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF2D2D2D));
+                getSupportActionBar().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF211F26));
             }
             
             // Create title with project name
