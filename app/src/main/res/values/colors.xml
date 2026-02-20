@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Brand -->
+    <color name="primary">#00C853</color>
+    <color name="primary_variant">#00E676</color>
+    <color name="primary_dark">#00A843</color>
+    
+    <!-- Surface & Background -->
+    <color name="surface_dark">#0D1117</color>
+    <color name="surface_elevated_dark">#161B22</color>
+    <color name="surface_overlay_dark">#1C2128</color>
+    <color name="surface_light">#FFFFFF</color>
+    <color name="surface_elevated_light">#F6F8FA</color>
+    
+    <!-- Text -->
+    <color name="text_primary_dark">#E6EDF3</color>
+    <color name="text_secondary_dark">#8B949E</color>
+    <color name="text_tertiary_dark">#6E7681</color>
+    <color name="text_primary_light">#1F2328</color>
+    <color name="text_secondary_light">#656D76</color>
+    
+    <!-- Borders & Dividers -->
+    <color name="border_dark">#30363D</color>
+    <color name="border_light">#D0D7DE</color>
+    <color name="divider_dark">#21262D</color>
+    
+    <!-- Semantic -->
+    <color name="success">#3FB950</color>
+    <color name="warning">#D29922</color>
+    <color name="error">#F85149</color>
+    <color name="info">#58A6FF</color>
+    
+    <!-- Editor -->
+    <color name="editor_bg_dark">#0D1117</color>
+    <color name="editor_gutter_dark">#161B22</color>
+    <color name="editor_line_highlight">#1C2128</color>
+    <color name="editor_selection">#264F78</color>
+    
+    <!-- Syntax Highlighting -->
+    <color name="syntax_keyword">#FF7B72</color>
+    <color name="syntax_string">#A5D6FF</color>
+    <color name="syntax_comment">#8B949E</color>
+    <color name="syntax_function">#D2A8FF</color>
+    <color name="syntax_number">#79C0FF</color>
+    
+    <!-- Overlay -->
+    <color name="scrim">#80000000</color>
+    <color name="ripple_dark">#40FFFFFF</color>
+    <color name="ripple_light">#20000000</color>
+</resources>
