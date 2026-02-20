@@ -779,6 +779,7 @@ public class IDEActivity extends AppCompatActivity {
     private boolean isLargeFile = false;
     private String fullFileContent = "";
     private int currentChunkStart = 0;
+    private int currentChunkLine = 0; // For line-based chunking
     private static final int CHUNK_SIZE = 10000; // Characters per chunk
     private static final int CHUNK_LINES = 500; // Lines per chunk for line-based files
     private boolean useLineBasedChunking = false;
@@ -1627,29 +1628,29 @@ public class IDEActivity extends AppCompatActivity {
         int currentPart, totalParts;
         
         if (useLineBasedChunking) {
-            // Line-based chunking
+            // Line-based chunking - position is a line number
             String[] allLines = fullFileContent.split("\n", -1);
-            int startLine = (position / CHUNK_LINES) * CHUNK_LINES;
-            int endLine = Math.min(startLine + CHUNK_LINES, allLines.length);
+            currentChunkLine = position;
+            int endLine = Math.min(currentChunkLine + CHUNK_LINES, allLines.length);
             
-            currentPart = (startLine / CHUNK_LINES) + 1;
+            currentPart = (currentChunkLine / CHUNK_LINES) + 1;
             totalParts = (allLines.length + CHUNK_LINES - 1) / CHUNK_LINES;
             
             // Calculate character position for startLine
             currentChunkStart = 0;
-            for (int i = 0; i < startLine; i++) {
+            for (int i = 0; i < currentChunkLine; i++) {
                 currentChunkStart += allLines[i].length() + 1;
             }
             
             // Build chunk from lines
             StringBuilder chunkBuilder = new StringBuilder();
-            for (int i = startLine; i < endLine; i++) {
+            for (int i = currentChunkLine; i < endLine; i++) {
                 chunkBuilder.append(allLines[i]);
                 if (i < endLine - 1) chunkBuilder.append("\n");
             }
             chunk = chunkBuilder.toString();
         } else {
-            // Character-based chunking
+            // Character-based chunking - position is a character offset
             currentChunkStart = (position / CHUNK_SIZE) * CHUNK_SIZE;
             int end = Math.min(currentChunkStart + CHUNK_SIZE, fullFileContent.length());
             
@@ -1662,7 +1663,7 @@ public class IDEActivity extends AppCompatActivity {
         StringBuilder displayText = new StringBuilder();
         
         // Add "Load Previous" button at top if not first chunk
-        if (currentChunkStart > 0) {
+        if (currentPart > 1) {
             displayText.append("▲▲▲ TAP TO LOAD PREVIOUS (").append(currentPart - 1).append("/").append(totalParts).append(") ▲▲▲\n\n");
         }
         
@@ -1670,11 +1671,7 @@ public class IDEActivity extends AppCompatActivity {
         displayText.append(chunk);
         
         // Add "Load Next" button at bottom if not last chunk
-        boolean hasNext = useLineBasedChunking ? 
-            (currentPart < totalParts) : 
-            (currentChunkStart + CHUNK_SIZE < fullFileContent.length());
-        
-        if (hasNext) {
+        if (currentPart < totalParts) {
             displayText.append("\n\n▼▼▼ TAP TO LOAD NEXT (").append(currentPart + 1).append("/").append(totalParts).append(") ▼▼▼");
         }
         
@@ -1778,33 +1775,39 @@ public class IDEActivity extends AppCompatActivity {
                 }
             }
             
+            // BLOCK ALL EVENTS on protected lines - check FIRST before button handling
+            if (protectedLine1Start >= 0 && offset >= protectedLine1Start && offset < protectedLine1End) {
+                return true; // Consume ALL events on this line
+            }
+            if (protectedLine2Start >= 0 && offset >= protectedLine2Start && offset < protectedLine2End) {
+                return true; // Consume ALL events on this line
+            }
+            
             // Handle button clicks on ACTION_DOWN
             if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
                 // Check if clicked on Previous button (entire ▲▲▲ line)
                 if (offset >= prevButtonStart && offset < prevButtonEnd && prevButtonEnd > 0) {
                     updateFullContentFromChunk();
-                    int step = useLineBasedChunking ? CHUNK_LINES : CHUNK_SIZE;
-                    int prevChunkStart = Math.max(0, currentChunkStart - step);
-                    loadChunkWithButtons(prevChunkStart);
+                    if (useLineBasedChunking) {
+                        int prevLine = Math.max(0, currentChunkLine - CHUNK_LINES);
+                        loadChunkWithButtons(prevLine);
+                    } else {
+                        int prevChunk = Math.max(0, currentChunkStart - CHUNK_SIZE);
+                        loadChunkWithButtons(prevChunk);
+                    }
                     return true; // Consume event
                 }
                 
                 // Check if clicked on Next button
                 if (offset >= nextButtonStart && offset <= text.length() && nextButtonStart < text.length()) {
                     updateFullContentFromChunk();
-                    int step = useLineBasedChunking ? CHUNK_LINES : CHUNK_SIZE;
-                    int nextChunkStart = currentChunkStart + step;
-                    if (nextChunkStart < fullFileContent.length()) {
-                        loadChunkWithButtons(nextChunkStart);
+                    if (useLineBasedChunking) {
+                        int nextLine = currentChunkLine + CHUNK_LINES;
+                        loadChunkWithButtons(nextLine);
+                    } else {
+                        int nextChunk = currentChunkStart + CHUNK_SIZE;
+                        loadChunkWithButtons(nextChunk);
                     }
-                    return true; // Consume event
-                }
-                
-                // BLOCK clicks on protected lines
-                if (protectedLine1Start >= 0 && offset >= protectedLine1Start && offset < protectedLine1End) {
-                    return true; // Consume event
-                }
-                if (protectedLine2Start >= 0 && offset >= protectedLine2Start && offset < protectedLine2End) {
                     return true; // Consume event
                 }
             }
