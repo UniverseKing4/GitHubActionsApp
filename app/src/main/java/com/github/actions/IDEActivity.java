@@ -943,20 +943,24 @@ public class IDEActivity extends AppCompatActivity {
                         String[] allLines = fullFileContent.split("\n", -1);
                         
                         if (line > 0 && line <= allLines.length) {
-                            // Calculate character position of this line in full file
-                            int charPos = 0;
-                            for (int i = 0; i < line - 1; i++) {
-                                charPos += allLines[i].length() + 1;
-                            }
-                            
                             // Save current chunk before loading new one
                             updateFullContentFromChunk();
                             
                             // Load the chunk containing this line
-                            loadChunkWithButtons(charPos);
+                            if (useLineBasedChunking) {
+                                // For line-based: calculate which chunk contains this line
+                                int targetChunkLine = ((line - 1) / CHUNK_LINES) * CHUNK_LINES;
+                                loadChunkWithButtons(targetChunkLine);
+                            } else {
+                                // For character-based: calculate character position
+                                int charPos = 0;
+                                for (int i = 0; i < line - 1; i++) {
+                                    charPos += allLines[i].length() + 1;
+                                }
+                                loadChunkWithButtons(charPos);
+                            }
                             
                             // Now find the exact cursor position in the displayed text
-                            // The displayed text has buttons, but we need to position cursor at the actual line
                             String displayedText = editor.getText().toString();
                             
                             // Find where the actual code starts (after prev button if present)
@@ -1010,14 +1014,30 @@ public class IDEActivity extends AppCompatActivity {
                     // Go to part
                     try {
                         int part = Integer.parseInt(partStr);
-                        int totalParts = (fullFileContent.length() + CHUNK_SIZE - 1) / CHUNK_SIZE;
+                        int totalParts;
                         
-                        if (part > 0 && part <= totalParts) {
-                            updateFullContentFromChunk();
-                            loadChunkWithButtons((part - 1) * CHUNK_SIZE);
-                            Toast.makeText(this, "Part " + part + "/" + totalParts, Toast.LENGTH_SHORT).show();
+                        if (useLineBasedChunking) {
+                            String[] allLines = fullFileContent.split("\n", -1);
+                            totalParts = (allLines.length + CHUNK_LINES - 1) / CHUNK_LINES;
+                            
+                            if (part > 0 && part <= totalParts) {
+                                updateFullContentFromChunk();
+                                int startLine = (part - 1) * CHUNK_LINES;
+                                loadChunkWithButtons(startLine);
+                                Toast.makeText(this, "Part " + part + "/" + totalParts, Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(this, "Invalid part number (1-" + totalParts + ")", Toast.LENGTH_SHORT).show();
+                            }
                         } else {
-                            Toast.makeText(this, "Invalid part number (1-" + totalParts + ")", Toast.LENGTH_SHORT).show();
+                            totalParts = (fullFileContent.length() + CHUNK_SIZE - 1) / CHUNK_SIZE;
+                            
+                            if (part > 0 && part <= totalParts) {
+                                updateFullContentFromChunk();
+                                loadChunkWithButtons((part - 1) * CHUNK_SIZE);
+                                Toast.makeText(this, "Part " + part + "/" + totalParts, Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(this, "Invalid part number (1-" + totalParts + ")", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     } catch (Exception e) {
                         Toast.makeText(this, "Invalid part number", Toast.LENGTH_SHORT).show();
