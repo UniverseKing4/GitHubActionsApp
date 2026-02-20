@@ -112,9 +112,19 @@ public class ProjectsActivity extends AppCompatActivity {
         
         loadProjects();
     }
+    
+    private AlertDialog.Builder createThemedDialog() {
+        SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
+        boolean isDark = themePrefs.getBoolean("darkMode", true);
+        
+        if (isDark && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            return new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog);
+        }
+        return createThemedDialog();
+    }
 
     private void createProject() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("New Project");
         
         LinearLayout layout = new LinearLayout(this);
@@ -239,7 +249,7 @@ public class ProjectsActivity extends AppCompatActivity {
     }
 
     private void editProject(String oldName, String path) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("Edit Project Name");
         EditText input = new EditText(this);
         input.setText(oldName);
@@ -277,7 +287,7 @@ public class ProjectsActivity extends AppCompatActivity {
     }
 
     private void deleteProject(String name, String path) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("Delete Project");
         builder.setMessage("Delete '" + name + "' and all its files?");
         builder.setPositiveButton("Delete", (d, w) -> {
@@ -326,7 +336,7 @@ public class ProjectsActivity extends AppCompatActivity {
         String profiles = profilePrefs.getString("profiles", "");
         String activeProfile = profilePrefs.getString("activeProfile", "");
         
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("GitHub Profiles");
         
         LinearLayout layout = new LinearLayout(this);
@@ -412,7 +422,7 @@ public class ProjectsActivity extends AppCompatActivity {
                         if (row.getChildAt(1) instanceof Button) {
                             Button btnDel = (Button) row.getChildAt(1);
                             btnDel.setOnClickListener(v -> {
-                                new AlertDialog.Builder(this)
+                                createThemedDialog()
                                     .setTitle("Delete Profile")
                                     .setMessage("Delete profile: " + username + "?")
                                     .setPositiveButton("Delete", (d, w) -> {
@@ -442,7 +452,7 @@ public class ProjectsActivity extends AppCompatActivity {
     }
 
     private void addProfile() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("Add GitHub Profile");
         
         LinearLayout layout = new LinearLayout(this);
@@ -490,7 +500,7 @@ public class ProjectsActivity extends AppCompatActivity {
             return;
         }
         
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("Clone Repository");
         
         LinearLayout layout = new LinearLayout(this);
@@ -607,7 +617,7 @@ public class ProjectsActivity extends AppCompatActivity {
     }
 
     private void showSettings() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("App Settings");
         
         LinearLayout layout = new LinearLayout(this);

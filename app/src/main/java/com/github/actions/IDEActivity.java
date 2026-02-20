@@ -670,9 +670,19 @@ public class IDEActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+    
+    private AlertDialog.Builder createThemedDialog() {
+        SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
+        boolean isDark = themePrefs.getBoolean("darkMode", true);
+        
+        if (isDark && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            return new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog);
+        }
+        return createThemedDialog();
+    }
 
     private void showSettings() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("Editor Settings");
         
         LinearLayout layout = new LinearLayout(this);
@@ -828,7 +838,7 @@ public class IDEActivity extends AppCompatActivity {
     private boolean useLineBasedChunking = false;
     
     private void showFindDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("Find");
         
         LinearLayout layout = new LinearLayout(this);
@@ -883,7 +893,7 @@ public class IDEActivity extends AppCompatActivity {
     }
 
     private void showReplaceDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("Find & Replace");
         
         LinearLayout layout = new LinearLayout(this);
@@ -955,7 +965,7 @@ public class IDEActivity extends AppCompatActivity {
     }
 
     private void showGoToLineDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         
         if (isLargeFile) {
             builder.setTitle("Go to Line or Part");
@@ -1324,7 +1334,7 @@ public class IDEActivity extends AppCompatActivity {
     }
 
     private void showSelectionMenu() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("Selected: " + selectedFiles.size());
         
         String[] options = new String[]{"Move", "Delete", "Done"};
@@ -1358,7 +1368,7 @@ public class IDEActivity extends AppCompatActivity {
             return;
         }
         
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("Move to folder");
         
         java.util.List<File> folders = new java.util.ArrayList<>();
@@ -1414,7 +1424,7 @@ public class IDEActivity extends AppCompatActivity {
             return;
         }
         
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("Delete " + selectedFiles.size() + " items?");
         builder.setMessage("This action cannot be undone.");
         builder.setPositiveButton("Delete", (d, w) -> {
@@ -1439,7 +1449,7 @@ public class IDEActivity extends AppCompatActivity {
     }
 
     private void showFolderMenu(File folder) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle(folder.getName());
         
         String[] options = new String[]{"New File Here", "New Folder Here", "Move", "Rename", "Delete"};
@@ -1457,7 +1467,7 @@ public class IDEActivity extends AppCompatActivity {
     }
 
     private void createNewFileInFolder(File folder) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("New File in " + folder.getName());
         EditText input = new EditText(this);
         input.setHint("filename.ext");
@@ -1481,7 +1491,7 @@ public class IDEActivity extends AppCompatActivity {
     }
 
     private void createNewFolderInFolder(File parent) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("New Folder in " + parent.getName());
         EditText input = new EditText(this);
         input.setHint("folder name");
@@ -1513,7 +1523,7 @@ public class IDEActivity extends AppCompatActivity {
     }
 
     private void showFileMenu(File file) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle(file.getName());
         
         String[] options = new String[]{"Open", "Move", "Rename", "Delete"};
@@ -1536,7 +1546,7 @@ public class IDEActivity extends AppCompatActivity {
     }
 
     private void renameFile(File file) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("Rename");
         EditText input = new EditText(this);
         input.setText(file.getName());
@@ -1571,7 +1581,7 @@ public class IDEActivity extends AppCompatActivity {
     }
 
     private void deleteFile(File file) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("Delete");
         builder.setMessage("Delete " + file.getName() + "?");
         builder.setPositiveButton("Delete", (d, w) -> {
@@ -1606,7 +1616,7 @@ public class IDEActivity extends AppCompatActivity {
     }
 
     private void createNewFolder() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("New Folder");
         EditText input = new EditText(this);
         input.setHint("folder name");
@@ -2535,7 +2545,7 @@ public class IDEActivity extends AppCompatActivity {
     }
 
     private void createNewFile() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("New File");
         EditText input = new EditText(this);
         input.setHint("filename.ext");
@@ -2617,7 +2627,7 @@ public class IDEActivity extends AppCompatActivity {
             return;
         }
         
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("Commit & Push");
         EditText input = new EditText(this);
         input.setHint("Commit message");
@@ -2851,7 +2861,7 @@ public class IDEActivity extends AppCompatActivity {
         File dir = new File(projectPath);
         int[] stats = calculateStats(dir);
         
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = createThemedDialog();
         builder.setTitle("Project Statistics");
         
         TextView tv = new TextView(this);
