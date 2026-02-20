@@ -672,7 +672,44 @@ public class IDEActivity extends AppCompatActivity {
     }
     
     private AlertDialog.Builder createThemedDialog() {
-        return new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        return builder;
+    }
+    
+    private AlertDialog showThemedDialog(AlertDialog.Builder builder) {
+        AlertDialog dialog = builder.create();
+        
+        SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
+        boolean isDark = themePrefs.getBoolean("darkMode", true);
+        
+        dialog.setOnShowListener(d -> {
+            if (isDark && dialog.getWindow() != null) {
+                // Set dark background
+                dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF2D2D2D));
+                
+                // Set text colors for all TextViews and EditTexts
+                android.view.ViewGroup root = (android.view.ViewGroup) dialog.getWindow().getDecorView();
+                setDarkColors(root);
+            }
+        });
+        
+        dialog.show();
+        return dialog;
+    }
+    
+    private void setDarkColors(android.view.ViewGroup parent) {
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            android.view.View child = parent.getChildAt(i);
+            
+            if (child instanceof TextView) {
+                ((TextView) child).setTextColor(0xFFFFFFFF);
+            } else if (child instanceof EditText) {
+                ((EditText) child).setTextColor(0xFFFFFFFF);
+                ((EditText) child).setHintTextColor(0xFF888888);
+            } else if (child instanceof android.view.ViewGroup) {
+                setDarkColors((android.view.ViewGroup) child);
+            }
+        }
     }
 
     private void showSettings() {
@@ -717,7 +754,7 @@ public class IDEActivity extends AppCompatActivity {
             Toast.makeText(this, "Font size: " + size + "sp", Toast.LENGTH_SHORT).show();
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void toggleWordWrap(MenuItem item) {
@@ -883,7 +920,7 @@ public class IDEActivity extends AppCompatActivity {
             }
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void showReplaceDialog() {
@@ -955,7 +992,7 @@ public class IDEActivity extends AppCompatActivity {
             }
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void showGoToLineDialog() {
@@ -1094,7 +1131,7 @@ public class IDEActivity extends AppCompatActivity {
                 }
             });
             builder.setNegativeButton("Cancel", null);
-            builder.show();
+            showThemedDialog(builder);
         } else {
             // Normal go to line for small files
             builder.setTitle("Go to Line");
@@ -1125,7 +1162,7 @@ public class IDEActivity extends AppCompatActivity {
                 }
             });
             builder.setNegativeButton("Cancel", null);
-            builder.show();
+            showThemedDialog(builder);
         }
     }
 
@@ -1346,7 +1383,7 @@ public class IDEActivity extends AppCompatActivity {
                     break;
             }
         });
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void exitSelectionMode() {
@@ -1397,7 +1434,7 @@ public class IDEActivity extends AppCompatActivity {
             exitSelectionMode();
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void collectFolders(File dir, java.util.List<File> folders) {
@@ -1439,7 +1476,7 @@ public class IDEActivity extends AppCompatActivity {
             exitSelectionMode();
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void showFolderMenu(File folder) {
@@ -1457,7 +1494,7 @@ public class IDEActivity extends AppCompatActivity {
                 case 4: deleteFile(folder); break;
             }
         });
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void createNewFileInFolder(File folder) {
@@ -1481,7 +1518,7 @@ public class IDEActivity extends AppCompatActivity {
             }
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void createNewFolderInFolder(File parent) {
@@ -1509,7 +1546,7 @@ public class IDEActivity extends AppCompatActivity {
             }
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void expandFolder(File folder, LinearLayout container) {
@@ -1530,7 +1567,7 @@ public class IDEActivity extends AppCompatActivity {
                 case 3: deleteFile(file); break;
             }
         });
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void moveSingleFile(File file) {
@@ -1571,7 +1608,7 @@ public class IDEActivity extends AppCompatActivity {
             }
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void deleteFile(File file) {
@@ -1594,7 +1631,7 @@ public class IDEActivity extends AppCompatActivity {
             }
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private boolean deleteRecursive(File file) {
@@ -1634,7 +1671,7 @@ public class IDEActivity extends AppCompatActivity {
             }
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void openFile(File file) {
@@ -2577,7 +2614,7 @@ public class IDEActivity extends AppCompatActivity {
             }
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void saveCurrentFile() {
@@ -2639,7 +2676,7 @@ public class IDEActivity extends AppCompatActivity {
             pushAllToGitHub(username, token, projectName, message);
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void pushAllToGitHub(String username, String token, String repo, String message) {
@@ -2870,7 +2907,7 @@ public class IDEActivity extends AppCompatActivity {
         
         builder.setView(tv);
         builder.setPositiveButton("OK", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private int[] calculateStats(File dir) {

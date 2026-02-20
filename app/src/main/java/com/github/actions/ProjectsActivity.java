@@ -116,6 +116,42 @@ public class ProjectsActivity extends AppCompatActivity {
     private AlertDialog.Builder createThemedDialog() {
         return new AlertDialog.Builder(this);
     }
+    
+    private AlertDialog showThemedDialog(AlertDialog.Builder builder) {
+        AlertDialog dialog = builder.create();
+        
+        SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
+        boolean isDark = themePrefs.getBoolean("darkMode", true);
+        
+        dialog.setOnShowListener(d -> {
+            if (isDark && dialog.getWindow() != null) {
+                // Set dark background
+                dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF2D2D2D));
+                
+                // Set text colors for all TextViews and EditTexts
+                android.view.ViewGroup root = (android.view.ViewGroup) dialog.getWindow().getDecorView();
+                setDarkColors(root);
+            }
+        });
+        
+        showThemedDialog(builder);
+        return dialog;
+    }
+    
+    private void setDarkColors(android.view.ViewGroup parent) {
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            android.view.View child = parent.getChildAt(i);
+            
+            if (child instanceof TextView) {
+                ((TextView) child).setTextColor(0xFFFFFFFF);
+            } else if (child instanceof EditText) {
+                ((EditText) child).setTextColor(0xFFFFFFFF);
+                ((EditText) child).setHintTextColor(0xFF888888);
+            } else if (child instanceof android.view.ViewGroup) {
+                setDarkColors((android.view.ViewGroup) child);
+            }
+        }
+    }
 
     private void createProject() {
         AlertDialog.Builder builder = createThemedDialog();
@@ -170,7 +206,7 @@ public class ProjectsActivity extends AppCompatActivity {
             }
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void saveProject(String name, String path) {
@@ -277,7 +313,7 @@ public class ProjectsActivity extends AppCompatActivity {
             }
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void deleteProject(String name, String path) {
@@ -297,7 +333,7 @@ public class ProjectsActivity extends AppCompatActivity {
             }
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private boolean deleteRecursive(File file) {
@@ -442,7 +478,7 @@ public class ProjectsActivity extends AppCompatActivity {
             addProfile();
         });
         
-        dialog.show();
+        showThemedDialog(builder);
     }
 
     private void addProfile() {
@@ -481,7 +517,7 @@ public class ProjectsActivity extends AppCompatActivity {
             showProfiles();
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void cloneRepo() {
@@ -525,7 +561,7 @@ public class ProjectsActivity extends AppCompatActivity {
             cloneRepoFromGitHub(repoOwner, token, repoName);
         });
         builder.setNegativeButton("Cancel", null);
-        builder.show();
+        showThemedDialog(builder);
     }
 
     private void cloneRepoFromGitHub(String username, String token, String repo) {
@@ -672,6 +708,6 @@ public class ProjectsActivity extends AppCompatActivity {
             recreate();
         });
         
-        dialog.show();
+        showThemedDialog(builder);
     }
 }
