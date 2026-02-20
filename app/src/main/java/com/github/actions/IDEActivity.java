@@ -707,6 +707,9 @@ public class IDEActivity extends AppCompatActivity {
         if (view instanceof EditText) {
             ((EditText) view).setTextColor(0xFFFFFFFF);
             ((EditText) view).setHintTextColor(0xFF888888);
+        } else if (view instanceof Button) {
+            // Keep button text black for visibility
+            ((Button) view).setTextColor(0xFF000000);
         } else if (view instanceof TextView) {
             ((TextView) view).setTextColor(0xFFFFFFFF);
         }
@@ -805,6 +808,67 @@ public class IDEActivity extends AppCompatActivity {
                 // For large files, update full content first
                 updateFullContentFromChunk();
                 redoStack.push(fullFileContent);
+                fullFileContent = undoStack.pop();
+                isUndoRedo = true;
+                // Reload current chunk
+                if (useLineBasedChunking) {
+                    loadChunkWithButtons(currentChunkLine);
+                } else {
+                    loadChunkWithButtons(currentChunkStart);
+                }
+                isUndoRedo = false;
+                Toast.makeText(this, "Undo", Toast.LENGTH_SHORT).show();
+            } else {
+                String current = editor.getText().toString();
+                redoStack.push(current);
+                String previous = undoStack.pop();
+                isUndoRedo = true;
+                editor.setText(previous);
+                if (currentFile != null) {
+                    applySyntaxHighlighting(currentFile.getName(), previous);
+                }
+                editor.setSelection(Math.min(previous.length(), editor.getText().length()));
+                isUndoRedo = false;
+                Toast.makeText(this, "Undo", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(this, "Nothing to undo", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void redo() {
+        if (!redoStack.isEmpty()) {
+            if (isLargeFile) {
+                // For large files, update full content first
+                updateFullContentFromChunk();
+                undoStack.push(fullFileContent);
+                fullFileContent = redoStack.pop();
+                isUndoRedo = true;
+                // Reload current chunk
+                if (useLineBasedChunking) {
+                    loadChunkWithButtons(currentChunkLine);
+                } else {
+                    loadChunkWithButtons(currentChunkStart);
+                }
+                isUndoRedo = false;
+                Toast.makeText(this, "Redo", Toast.LENGTH_SHORT).show();
+            } else {
+                String current = editor.getText().toString();
+                undoStack.push(current);
+                String next = redoStack.pop();
+                isUndoRedo = true;
+                editor.setText(next);
+                if (currentFile != null) {
+                    applySyntaxHighlighting(currentFile.getName(), next);
+                }
+                editor.setSelection(Math.min(next.length(), editor.getText().length()));
+                isUndoRedo = false;
+                Toast.makeText(this, "Redo", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(this, "Nothing to redo", Toast.LENGTH_SHORT).show();
+        }
+    }
                 fullFileContent = undoStack.pop();
                 isUndoRedo = true;
                 // Reload current chunk
@@ -1011,15 +1075,26 @@ public class IDEActivity extends AppCompatActivity {
             layout.setOrientation(android.widget.LinearLayout.VERTICAL);
             layout.setPadding(50, 20, 50, 20);
             
+            TextView lineLabel = new TextView(this);
+            lineLabel.setText("Line number:");
+            lineLabel.setPadding(0, 0, 0, 5);
+            layout.addView(lineLabel);
+            
             EditText lineInput = new EditText(this);
-            lineInput.setHint("Line number (optional)");
+            lineInput.setHint("Enter line number");
             lineInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+            lineInput.setSingleLine(true);
             layout.addView(lineInput);
             
+            TextView partLabel = new TextView(this);
+            partLabel.setText("Part number:");
+            partLabel.setPadding(0, 20, 0, 5);
+            layout.addView(partLabel);
+            
             EditText partInput = new EditText(this);
-            partInput.setHint("Part number (optional)");
+            partInput.setHint("Enter part number");
             partInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-            partInput.setPadding(0, 20, 0, 0);
+            partInput.setSingleLine(true);
             layout.addView(partInput);
             
             builder.setView(layout);
