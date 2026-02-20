@@ -1209,7 +1209,7 @@ public class IDEActivity extends AppCompatActivity {
         if (!dir.exists()) dir.mkdirs();
         
         SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
-        boolean isDark = themePrefs.getBoolean("darkMode", true);
+        boolean isDark = themePrefs.getBoolean("darkMode", false);
         
         File[] files = dir.listFiles();
         if (files == null || files.length == 0) {
@@ -1239,7 +1239,7 @@ public class IDEActivity extends AppCompatActivity {
 
     private void createFileItem(File file, LinearLayout container, int depth) {
         SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
-        boolean isDark = themePrefs.getBoolean("darkMode", true);
+        boolean isDark = themePrefs.getBoolean("darkMode", false);
         
         LinearLayout itemLayout = new LinearLayout(this);
         itemLayout.setOrientation(LinearLayout.VERTICAL);
@@ -2196,9 +2196,8 @@ public class IDEActivity extends AppCompatActivity {
         // Add to tabs if not already open
         if (!openTabs.contains(file)) {
             openTabs.add(file);
-        }
-        updateTabBar();
-        if (true) {
+            updateTabBar();
+        } else {
             highlightActiveTab(file);
         }
         
@@ -2210,7 +2209,7 @@ public class IDEActivity extends AppCompatActivity {
 
     private void updateTabBar() {
         SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
-        boolean isDark = themePrefs.getBoolean("darkMode", true);
+        boolean isDark = themePrefs.getBoolean("darkMode", false);
         
         tabBar.removeAllViews();
         for (File file : openTabs) {
@@ -2249,7 +2248,7 @@ public class IDEActivity extends AppCompatActivity {
 
     private void highlightActiveTab(File file) {
         SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
-        boolean isDark = themePrefs.getBoolean("darkMode", true);
+        boolean isDark = themePrefs.getBoolean("darkMode", false);
         
         for (int i = 0; i < tabBar.getChildCount() && i < openTabs.size(); i++) {
             try {
@@ -2370,7 +2369,7 @@ public class IDEActivity extends AppCompatActivity {
         if (content == null || content.isEmpty()) return;
         
         SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
-        boolean isDark = themePrefs.getBoolean("darkMode", true);
+        boolean isDark = themePrefs.getBoolean("darkMode", false);
         
         String ext = "";
         int i = fileName.lastIndexOf('.');
@@ -2447,7 +2446,7 @@ public class IDEActivity extends AppCompatActivity {
         }
         
         SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
-        boolean isDark = themePrefs.getBoolean("darkMode", true);
+        boolean isDark = themePrefs.getBoolean("darkMode", false);
         
         String ext = "";
         int i = fileName.lastIndexOf('.');

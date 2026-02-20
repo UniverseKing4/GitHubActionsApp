@@ -728,7 +728,7 @@ public class ProjectsActivity extends AppCompatActivity {
         
         Button btnDarkMode = new Button(this);
         SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
-        boolean isDark = themePrefs.getBoolean("darkMode", true);
+        boolean isDark = themePrefs.getBoolean("darkMode", false);
         btnDarkMode.setText(isDark ? "☀ Switch to Light Mode" : "🌙 Switch to Dark Mode");
         layout.addView(btnDarkMode);
         
@@ -743,7 +743,7 @@ public class ProjectsActivity extends AppCompatActivity {
         AlertDialog dialog = builder.create();
         
         btnDarkMode.setOnClickListener(v -> {
-            boolean currentDark = themePrefs.getBoolean("darkMode", true);
+            boolean currentDark = themePrefs.getBoolean("darkMode", false);
             themePrefs.edit().putBoolean("darkMode", !currentDark).apply();
             dialog.dismiss();
             recreate();
