@@ -119,44 +119,8 @@ public class ProjectsActivity extends AppCompatActivity {
     
     private AlertDialog showThemedDialog(AlertDialog.Builder builder) {
         AlertDialog dialog = builder.create();
-        
-        SharedPreferences themePrefs = getSharedPreferences("GitCodeTheme", MODE_PRIVATE);
-        boolean isDark = themePrefs.getBoolean("darkMode", true);
-        
-        dialog.setOnShowListener(d -> {
-            if (isDark && dialog.getWindow() != null) {
-                // Set dark background
-                dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF2D2D2D));
-                
-                // Set text colors for all TextViews and EditTexts
-                android.view.ViewGroup root = (android.view.ViewGroup) dialog.getWindow().getDecorView();
-                setDarkColors(root);
-            }
-        });
-        
-        showThemedDialog(builder);
+        dialog.show();
         return dialog;
-    }
-    
-    private void setDarkColors(android.view.ViewGroup parent) {
-        if (parent == null) return;
-        
-        try {
-            for (int i = 0; i < parent.getChildCount(); i++) {
-                android.view.View child = parent.getChildAt(i);
-                
-                if (child instanceof EditText) {
-                    ((EditText) child).setTextColor(0xFFFFFFFF);
-                    ((EditText) child).setHintTextColor(0xFF888888);
-                } else if (child instanceof TextView) {
-                    ((TextView) child).setTextColor(0xFFFFFFFF);
-                } else if (child instanceof android.view.ViewGroup) {
-                    setDarkColors((android.view.ViewGroup) child);
-                }
-            }
-        } catch (Exception e) {
-            // Skip if error
-        }
     }
 
     private void createProject() {
