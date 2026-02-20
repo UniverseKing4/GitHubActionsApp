@@ -952,20 +952,42 @@ public class IDEActivity extends AppCompatActivity {
                             // Load the chunk containing this line
                             loadChunkWithButtons(charPos);
                             
-                            // Calculate position within the displayed chunk
+                            // Now find the exact cursor position in the displayed text
+                            // The displayed text has buttons, but we need to position cursor at the actual line
                             String displayedText = editor.getText().toString();
-                            int buttonOffset = displayedText.startsWith("▲▲▲") ? 
-                                displayedText.indexOf("\n\n") + 2 : 0;
                             
-                            // Calculate line position within chunk
-                            int linesBeforeChunk = fullFileContent.substring(0, currentChunkStart).split("\n", -1).length - 1;
-                            int targetLineInChunk = line - linesBeforeChunk - 1;
+                            // Find where the actual code starts (after prev button if present)
+                            int codeStartInDisplay = 0;
+                            if (displayedText.startsWith("▲▲▲")) {
+                                int endOfButton = displayedText.indexOf("\n\n");
+                                if (endOfButton > 0) {
+                                    codeStartInDisplay = endOfButton + 2;
+                                }
+                            }
                             
-                            // Find cursor position in displayed text
-                            String[] displayedLines = displayedText.substring(buttonOffset).split("\n", -1);
-                            int cursorPos = buttonOffset;
-                            for (int i = 0; i < targetLineInChunk && i < displayedLines.length; i++) {
-                                cursorPos += displayedLines[i].length() + 1;
+                            // Calculate which line in the full file corresponds to first line of current chunk
+                            int firstLineOfChunk = fullFileContent.substring(0, currentChunkStart).split("\n", -1).length;
+                            if (currentChunkStart == 0) firstLineOfChunk = 1;
+                            
+                            // Calculate how many lines into the displayed code we need to go
+                            int linesIntoChunk = line - firstLineOfChunk;
+                            
+                            // Find cursor position by counting lines in the displayed code (not including buttons)
+                            int cursorPos = codeStartInDisplay;
+                            String codeContent = displayedText.substring(codeStartInDisplay);
+                            
+                            // Remove next button if present
+                            if (codeContent.endsWith("▼▼▼")) {
+                                int buttonStart = codeContent.lastIndexOf("\n\n▼▼▼");
+                                if (buttonStart > 0) {
+                                    codeContent = codeContent.substring(0, buttonStart);
+                                }
+                            }
+                            
+                            // Now count lines in the actual code
+                            String[] codeLines = codeContent.split("\n", -1);
+                            for (int i = 0; i < linesIntoChunk && i < codeLines.length; i++) {
+                                cursorPos += codeLines[i].length() + 1;
                             }
                             
                             // Set cursor to line start
