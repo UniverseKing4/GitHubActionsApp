@@ -70,29 +70,29 @@
     </style>
     
     <!-- Text Styles -->
+    <style name="Text">
+        <item name="android:textColor">@color/text_primary_dark</item>
+    </style>
+    
     <style name="Text.Display">
         <item name="android:textSize">@dimen/text_display</item>
-        <item name="android:textColor">@color/text_primary_dark</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:letterSpacing">-0.02</item>
     </style>
     
     <style name="Text.Headline">
         <item name="android:textSize">@dimen/text_headline</item>
-        <item name="android:textColor">@color/text_primary_dark</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:letterSpacing">-0.01</item>
     </style>
     
     <style name="Text.Title">
         <item name="android:textSize">@dimen/text_title</item>
-        <item name="android:textColor">@color/text_primary_dark</item>
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>
     
     <style name="Text.Body">
         <item name="android:textSize">@dimen/text_body</item>
-        <item name="android:textColor">@color/text_primary_dark</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:lineSpacingMultiplier">1.5</item>
     </style>
@@ -120,6 +120,5 @@
         <item name="tabTextColor">@color/text_secondary_dark</item>
         <item name="tabSelectedTextColor">@color/text_primary_dark</item>
         <item name="tabBackground">@color/surface_elevated_dark</item>
-        <item name="tabMinHeight">@dimen/tab_height</item>
     </style>
 </resources>
