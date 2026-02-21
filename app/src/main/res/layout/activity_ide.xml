@@ -103,8 +103,7 @@
                     android:inputType="textMultiLine|textNoSuggestions"
                     android:hint="@string/no_files"
                     android:textColorHint="@color/dark_on_surface_disabled"
-                    android:lineSpacingExtra="0dp"
-                    android:horizontalScrollEnabled="false" />
+                    android:lineSpacingExtra="0dp" />
 
             </ScrollView>
 
