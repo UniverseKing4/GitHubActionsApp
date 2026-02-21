@@ -1,4 +1,261 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ============================================
+         APP BRANDING
+         ============================================ -->
     <string name="app_name">GitCode</string>
+    <string name="app_tagline">Professional Mobile IDE</string>
+    <string name="app_description">Transform your Android device into a powerful development environment</string>
+    
+    <!-- ============================================
+         HOME SCREEN / PROJECTS
+         ============================================ -->
+    <string name="home_title">GitCode</string>
+    <string name="projects_title">Projects</string>
+    <string name="no_projects">No projects yet. Create one to get started!</string>
+    <string name="new_project">New Project</string>
+    <string name="clone_repository">Clone from GitHub</string>
+    <string name="github_profiles">GitHub Profiles</string>
+    <string name="settings">Settings</string>
+    <string name="project_name">Project Name</string>
+    <string name="project_path">Path (optional)</string>
+    <string name="create">Create</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="rename">Rename</string>
+    <string name="save">Save</string>
+    <string name="close">Close</string>
+    <string name="add">Add</string>
+    
+    <!-- Project Actions -->
+    <string name="project_already_exists">Project already exists</string>
+    <string name="project_created">Project created successfully</string>
+    <string name="project_deleted">Project deleted</string>
+    <string name="project_renamed">Project renamed</string>
+    <string name="project_not_found">Project folder not found</string>
+    <string name="enter_project_name">Enter project name</string>
+    <string name="another_project_same_name">Another project has the same name</string>
+    <string name="failed_create_project">Failed to create project</string>
+    <string name="failed_delete_project">Failed to delete project</string>
+    <string name="failed_rename_project">Failed to rename project</string>
+    
+    <!-- ============================================
+         IDE / EDITOR
+         ============================================ -->
+    <string name="ide_title">IDE</string>
+    <string name="code_editor">Code Editor</string>
+    <string name="files">Files</string>
+    <string name="no_files">No files in project.\n\nTap the menu icon to create a new file or folder.</string>
+    <string name="welcome_message">Welcome to GitCode IDE\n\nCreate or open a file to start coding.</string>
+    
+    <!-- Editor Toolbar -->
+    <string name="save_file">Save File</string>
+    <string name="undo">Undo</string>
+    <string name="redo">Redo</string>
+    <string name="push">Push</string>
+    <string name="commit">Commit</string>
+    
+    <!-- File Operations -->
+    <string name="new_file">New File</string>
+    <string name="new_folder">New Folder</string>
+    <string name="select">Select</string>
+    <string name="actions">Actions</string>
+    <string name="file_name">File Name</string>
+    <string name="folder_name">Folder Name</string>
+    <string name="enter_filename">Enter filename with extension</string>
+    <string name="enter_foldername">Enter folder name</string>
+    
+    <!-- File Selection -->
+    <string name="selection_mode">Selection Mode</string>
+    <string name="items_selected">%d items selected</string>
+    <string name="select_all">Select All</string>
+    <string name="deselect_all">Deselect All</string>
+    <string name="rename_selected">Rename Selected</string>
+    <string name="delete_selected">Delete Selected</string>
+    <string name="move_selected">Move Selected</string>
+    <string name="copy_selected">Copy Selected</string>
+    
+    <!-- File Actions -->
+    <string name="file_saved">File saved</string>
+    <string name="file_created">File created</string>
+    <string name="folder_created">Folder created</string>
+    <string name="file_renamed">File renamed</string>
+    <string name="file_deleted">File deleted</string>
+    <string name="failed_save">Failed to save file</string>
+    <string name="failed_create_file">Failed to create file</string>
+    <string name="failed_create_folder">Failed to create folder</string>
+    
+    <!-- ============================================
+         GITHUB INTEGRATION
+         ============================================ -->
+    <string name="github">GitHub</string>
+    <string name="github_settings">GitHub Settings</string>
+    <string name="github_credentials">GitHub Credentials</string>
+    <string name="github_username">GitHub Username</string>
+    <string name="github_token">Personal Access Token</string>
+    <string name="github_repo">Repository Name</string>
+    <string name="github_url">Repository URL</string>
+    <string name="github_url_hint">e.g., https://github.com/username/repo</string>
+    <string name="clone">Clone</string>
+    <string name="cloning">Cloning…</string>
+    <string name="cloned_successfully">Cloned %d files</string>
+    <string name="clone_failed">Failed to clone</string>
+    <string name="repo_not_found">Repository not found</string>
+    <string name="invalid_github_url">Invalid GitHub URL</string>
+    <string name="repository_empty">Repository is empty or couldn\'t fetch files</string>
+    <string name="commit_and_push">Commit &amp; Push</string>
+    <string name="commit_message">Commit Message</string>
+    <string name="commit_hint">Update %s</string>
+    <string name="pushing">Pushing…</string>
+    <string name="push_success">Changes pushed successfully</string>
+    <string name="push_failed">Push failed</string>
+    <string name="pull">Pull</string>
+    <string name="pulling">Pulling…</string>
+    <string name="pull_success">Changes pulled successfully</string>
+    <string name="pull_failed">Pull failed</string>
+    <string name="configure_github">Configure GitHub credentials first</string>
+    
+    <!-- GitHub Profiles -->
+    <string name="profiles_title">GitHub Profiles</string>
+    <string name="no_profiles">No profiles yet</string>
+    <string name="add_profile">Add Profile</add_profile>
+    <string name="profile_added">Profile added</string>
+    <string name="profile_deleted">Profile deleted</string>
+    <string name="active_profile">Active: %s</string>
+    <string name="delete_profile">Delete Profile</string>
+    <string name="delete_profile_confirm">Delete profile: %s?</string>
+    <string name="fill_all_fields">Fill all fields</string>
+    
+    <!-- ============================================
+         DIALOGS
+         ============================================ -->
+    <string name="dialog_title_new_project">New Project</string>
+    <string name="dialog_title_new_file">New File</string>
+    <string name="dialog_title_new_folder">New Folder</string>
+    <string name="dialog_title_rename">Rename</string>
+    <string name="dialog_title_delete">Delete</string>
+    <string name="dialog_title_commit">Commit</string>
+    <string name="dialog_title_settings">Settings</string>
+    <string name="dialog_title_github">GitHub</string>
+    <string name="dialog_title_clone">Clone Repository</string>
+    <string name="dialog_title_find">Find</string>
+    <string name="dialog_title_replace">Replace</string>
+    
+    <!-- Confirmation Messages -->
+    <string name="confirm_delete_project">Delete \'%s\' and all its files?</string>
+    <string name="confirm_delete_file">Delete \'%s\'?</string>
+    <string name="confirm_delete_files">Delete %d selected items?</string>
+    <string name="unsaved_changes">You have unsaved changes</string>
+    <string name="save_before_close">Save before closing?</string>
+    
+    <!-- ============================================
+         SETTINGS
+         ============================================ -->
+    <string name="app_settings">App Settings</string>
+    <string name="editor_settings">Editor Settings</string>
+    <string name="theme_settings">Theme</string>
+    <string name="font_size_settings">Font Size</string>
+    <string name="font_size_label">Font Size: %dsp</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="light_mode">Light Mode</string>
+    <string name="switch_to_light">☀ Switch to Light Mode</string>
+    <string name="switch_to_dark">🌙 Switch to Dark Mode</string>
+    <string name="settings_saved">Settings saved</string>
+    
+    <!-- Editor Preferences -->
+    <string name="word_wrap">Word Wrap</string>
+    <string name="line_numbers">Line Numbers</string>
+    <string name="auto_save">Auto Save</string>
+    <string name="auto_indent">Auto Indent</string>
+    <string name="auto_brackets">Auto Brackets</string>
+    <string name="syntax_highlighting">Syntax Highlighting</string>
+    
+    <!-- ============================================
+         FIND & REPLACE
+         ============================================ -->
+    <string name="find">Find</string>
+    <string name="replace">Replace</string>
+    <string name="find_hint">Find</string>
+    <string name="replace_hint">Replace</string>
+    <string name="find_next">Find Next</string>
+    <string name="find_previous">Find Previous</string>
+    <string name="replace_all">Replace All</string>
+    <string name="occurrences_found">%d occurrences found</string>
+    <string name="no_occurrences">No occurrences found</string>
+    <string name="replaced_occurrences">Replaced %d occurrences</string>
+    
+    <!-- ============================================
+         UTILITIES
+         ============================================ -->
+    <string name="loading">Loading…</string>
+    <string name="saving">Saving…</string>
+    <string name="processing">Processing…</string>
+    <string name="error">Error</string>
+    <string name="success">Success</string>
+    <string name="warning">Warning</string>
+    <string name="info">Info</string>
+    <string name="done">Done</string>
+    <string name="retry">Retry</string>
+    <string name="dismiss">Dismiss</string>
+    
+    <!-- Error Messages -->
+    <string name="error_unknown">An unknown error occurred</string>
+    <string name="error_network">Network error. Please check your connection.</string>
+    <string name="error_storage">Storage error. Please check permissions.</string>
+    <string name="error_file_not_found">File not found</string>
+    <string name="error_invalid_input">Invalid input</string>
+    <string name="error_permission">Permission denied</string>
+    
+    <!-- Permissions -->
+    <string name="storage_permission_title">Storage Permission Required</string>
+    <string name="storage_permission_message">GitCode needs storage access to manage your projects.</string>
+    <string name="storage_permission_granted">Storage permission granted</string>
+    <string name="storage_permission_denied">Storage permission required for app to function</string>
+    <string name="manage_storage_permission">Manage all files permission is required</string>
+    
+    <!-- ============================================
+         KEYBOARD SHORTCUTS
+         ============================================ -->
+    <string name="shortcut_save">Ctrl+S - Save</string>
+    <string name="shortcut_undo">Ctrl+Z - Undo</string>
+    <string name="shortcut_redo">Ctrl+Y - Redo</string>
+    <string name="shortcut_find">Ctrl+F - Find</string>
+    <string name="shortcut_tab">Tab - Indent</string>
+    
+    <!-- ============================================
+         ACCESSIBILITY
+         ============================================ -->
+    <string name="content_description_menu">Menu</string>
+    <string name="content_description_back">Back</string>
+    <string name="content_description_save">Save</string>
+    <string name="content_description_close_tab">Close tab</string>
+    <string name="content_description_drawer">File drawer</string>
+    <string name="content_description_line_numbers">Line numbers</string>
+    <string name="content_description_toggle_selection">Toggle selection mode</string>
+    
+    <!-- ============================================
+         FILE TYPES
+         ============================================ -->
+    <string name="file_type_java">Java</string>
+    <string name="file_type_kotlin">Kotlin</string>
+    <string name="file_type_python">Python</string>
+    <string name="file_type_javascript">JavaScript</string>
+    <string name="file_type_typescript">TypeScript</string>
+    <string name="file_type_html">HTML</string>
+    <string name="file_type_css">CSS</string>
+    <string name="file_type_xml">XML</string>
+    <string name="file_type_json">JSON</string>
+    <string name="file_type_markdown">Markdown</string>
+    <string name="file_type_text">Text</string>
+    
+    <!-- ============================================
+         TOAST MESSAGES
+         ============================================ -->
+    <string name="toast_credentials_cleared">Credentials cleared</string>
+    <string name="toast_settings_saved">Settings saved</string>
+    <string name="toast_file_saved">File saved</string>
+    <string name="toast_changes_saved">Changes saved</string>
+    <string name="toast_no_changes">No changes to save</string>
+    <string name="toast_clipboard">Copied to clipboard</string>
 </resources>
