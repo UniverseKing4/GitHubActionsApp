@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawerLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_background">
+
+    <!-- Main Editor Area -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/dark_editor_background">
+
+        <!-- Tab Bar -->
+        <HorizontalScrollView
+            android:id="@+id/tabScroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/dark_tab_bar_background"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/tabBar"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:gravity="center_vertical" />
+
+        </HorizontalScrollView>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/dark_divider" />
+
+        <!-- Editor Container -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <!-- Line Numbers -->
+            <ScrollView
+                android:id="@+id/lineNumberScroll"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@color/dark_line_number_background"
+                android:scrollbars="none"
+                android:overScrollMode="never">
+
+                <TextView
+                    android:id="@+id/lineNumbers"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="4dp"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="20dp"
+                    android:fontFamily="monospace"
+                    android:textSize="14sp"
+                    android:textColor="@color/dark_line_number_text"
+                    android:gravity="end"
+                    android:lineSpacingExtra="0dp"
+                    android:minWidth="48dp" />
+
+            </ScrollView>
+
+            <!-- Divider -->
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/dark_divider" />
+
+            <!-- Code Editor -->
+            <ScrollView
+                android:id="@+id/editorScroll"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/dark_editor_background"
+                android:scrollbars="vertical"
+                android:overScrollMode="always">
+
+                <EditText
+                    android:id="@+id/editor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="20dp"
+                    android:fontFamily="monospace"
+                    android:textSize="14sp"
+                    android:textColor="@color/dark_editor_text"
+                    android:background="@null"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine|textNoSuggestions"
+                    android:hint="@string/no_files"
+                    android:textColorHint="@color/dark_on_surface_disabled"
+                    android:lineSpacingExtra="0dp"
+                    android:horizontalScrollEnabled="false" />
+
+            </ScrollView>
+
+        </LinearLayout>
+
+        <!-- Status Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:orientation="horizontal"
+            android:background="@color/dark_surface"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <!-- File Info -->
+            <TextView
+                android:id="@+id/tvCurrentFile"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="No file"
+                android:textAppearance="@style/TextAppearance.GitCode.Caption"
+                android:textColor="@color/dark_on_surface_variant"
+                android:singleLine="true"
+                android:ellipsize="end" />
+
+            <!-- Line/Column Info -->
+            <TextView
+                android:id="@+id/tvCursorPosition"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="Ln 1, Col 1"
+                android:textAppearance="@style/TextAppearance.GitCode.Caption"
+                android:textColor="@color/dark_on_surface_variant"
+                android:fontFamily="monospace" />
+
+            <!-- Encoding -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="UTF-8"
+                android:textAppearance="@style/TextAppearance.GitCode.Caption"
+                android:textColor="@color/dark_on_surface_disabled"
+                android:fontFamily="monospace" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- File Drawer -->
+    <LinearLayout
+        android:id="@+id/drawer"
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@color/dark_drawer_background"
+        android:orientation="vertical"
+        android:elevation="8dp">
+
+        <!-- Drawer Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@color/dark_surface_elevated">
+
+            <!-- Project Name -->
+            <TextView
+                android:id="@+id/tvProjectName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Project"
+                android:textAppearance="@style/TextAppearance.GitCode.Headline6"
+                android:textColor="@color/dark_on_surface"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:ellipsize="end" />
+
+            <!-- Project Path -->
+            <TextView
+                android:id="@+id/tvProjectPath"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="/path/to/project"
+                android:textAppearance="@style/TextAppearance.GitCode.Caption"
+                android:textColor="@color/dark_on_surface_variant"
+                android:singleLine="true"
+                android:ellipsize="end" />
+
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/dark_divider" />
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:gravity="center">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnNewFile"
+                style="@style/Widget.GitCode.Button.TextButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/new_file"
+                android:insetTop="4dp"
+                android:insetBottom="4dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnNewFolder"
+                style="@style/Widget.GitCode.Button.TextButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/new_folder"
+                android:insetTop="4dp"
+                android:insetBottom="4dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSelect"
+                style="@style/Widget.GitCode.Button.TextButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/select"
+                android:insetTop="4dp"
+                android:insetBottom="4dp" />
+
+        </LinearLayout>
+
+        <!-- Selection Actions (Hidden by default) -->
+        <LinearLayout
+            android:id="@+id/selectionActions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSelectionActions"
+                style="@style/Widget.GitCode.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/actions"
+                android:layout_marginEnd="4dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCancelSelect"
+                style="@style/Widget.GitCode.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cancel"
+                android:layout_marginStart="4dp" />
+
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/dark_divider" />
+
+        <!-- File List -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:id="@+id/fileList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp" />
+
+        </ScrollView>
+
+    </LinearLayout>
+
+</androidx.drawerlayout.widget.DrawerLayout>

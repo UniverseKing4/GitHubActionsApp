@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.appbar.MaterialToolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:background="@color/dark_surface"
+    android:elevation="0dp"
+    app:contentInsetStartWithNavigation="0dp"
+    app:navigationIconTint="@color/dark_on_surface">
+
+    <!-- Custom Title -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|center_vertical"
+        android:text="GitCode"
+        android:textAppearance="@style/TextAppearance.GitCode.Subtitle1"
+        android:textColor="@color/dark_on_surface"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:maxWidth="200dp" />
+
+    <!-- Toolbar Actions -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|center_vertical"
+        android:orientation="horizontal">
+
+        <!-- Save Button -->
+        <FrameLayout
+            android:id="@+id/btnSave"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/bg_toolbar_button"
+            android:contentDescription="@string/save">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_save"
+                android:tint="@color/dark_on_surface" />
+
+        </FrameLayout>
+
+        <!-- Undo Button -->
+        <FrameLayout
+            android:id="@+id/btnUndo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/bg_toolbar_button"
+            android:contentDescription="@string/undo">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_undo"
+                android:tint="@color/dark_on_surface" />
+
+        </FrameLayout>
+
+        <!-- Redo Button -->
+        <FrameLayout
+            android:id="@+id/btnRedo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/bg_toolbar_button"
+            android:contentDescription="@string/redo">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_redo"
+                android:tint="@color/dark_on_surface" />
+
+        </FrameLayout>
+
+        <!-- Push Button (Highlighted) -->
+        <FrameLayout
+            android:id="@+id/btnPush"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/bg_toolbar_button"
+            android:contentDescription="@string/push">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_push"
+                android:tint="@color/dark_primary" />
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.appbar.MaterialToolbar>

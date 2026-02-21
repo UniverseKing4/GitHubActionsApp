@@ -10,10 +10,13 @@
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="GitCode"
-        android:theme="@style/Theme.AppCompat.Light">
+        android:supportsRtl="true"
+        android:theme="@style/Theme.GitCode">
         <activity
             android:name=".ProjectsActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="unspecified"
+            android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -22,13 +25,17 @@
         <activity
             android:name=".IDEActivity"
             android:exported="false"
-            android:label="IDE" />
+            android:screenOrientation="unspecified"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".MainActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="unspecified" />
         <activity
             android:name=".EditorActivity"
             android:exported="false"
-            android:label="Code Editor" />
+            android:screenOrientation="unspecified"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 </manifest>
